@@ -25,7 +25,7 @@ const PROJECTS: Project[] = [
     tags: ["Healthcare", "Python", "ML (baseline)", "Data Cleaning", "Jupyter"],
     imageUrl: "/images/health-project.jpg",
     githubUrl: "https://github.com/zlundra/portfolio-2026",
-    notebookUrl: "/notebooks/clinical_outcomes_predictor.ipynb"
+    notebookUrl: "/notebooks/Clinical%20Outcomes%20Predictor%20(Healthcare%20ML).html"
   },
   {
     id: "proptech-intelligence",
@@ -35,7 +35,9 @@ const PROJECTS: Project[] = [
     tags: ["PropTech", "Python", "Analytics", "Feature Engineering", "Jupyter"],
     imageUrl: "/images/proptech-project.jpg",
     githubUrl: "https://github.com/zlundra/portfolio-2026",
-    notebookUrl: "/notebooks/real_estate_market_intelligence.ipynb"
+    notebookUrl: "/notebooks/Global%20Real%20Estate%20Intelligence%20(PropTech).html"
+
+"
   },
   {
     id: "public-health",
@@ -45,7 +47,8 @@ const PROJECTS: Project[] = [
     tags: ["Data Engineering", "ETL", "Python", "Quality Checks", "Jupyter"],
     imageUrl: "/images/hero-bg.jpg",
     githubUrl: "https://github.com/zlundra/portfolio-2026",
-    notebookUrl: "/notebooks/public_health_surveillance.ipynb"
+    notebookUrl: "/notebooks/Public%20Health%20Surveillance%20(Data%20Engineering).html"
+
   }
 ];
 
