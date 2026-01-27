@@ -28,7 +28,7 @@ const PROJECTS: Project[] = [
     notebookUrl: "/notebooks/Clinical%20Outcomes%20Predictor%20(Healthcare%20ML).html"
   },
   {
-    id: "proptech-intelligence",
+    id: "id: "global-real-estate",
     title: "Global Real Estate Intelligence",
     description:
       "A market intelligence notebook that cleans global property data and builds comparable valuation metrics for cross-market analysis.",
