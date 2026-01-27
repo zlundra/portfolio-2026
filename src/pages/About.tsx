@@ -12,7 +12,7 @@ export default function About() {
           <div className="relative">
             <div className="absolute -inset-4 bg-gradient-to-r from-primary to-secondary opacity-30 blur-2xl rounded-full" />
             <img
-              src="/images/about-bg.jpg"
+              src="/images/valentina.jpg"
               alt="Valentina Resner"
               className="relative rounded-2xl w-full object-cover shadow-2xl border border-white/10 aspect-[4/5]"
             />
