@@ -13,7 +13,7 @@ type Project = {
   imageUrl: string;
   githubUrl?: string;
   demoUrl?: string;
-  notebookUrl?: string;
+  notebookUrl?: string; // this should point to the HTML notebook
 };
 
 const PROJECTS: Project[] = [
@@ -25,19 +25,19 @@ const PROJECTS: Project[] = [
     tags: ["Healthcare", "Python", "ML (baseline)", "Data Cleaning", "Jupyter"],
     imageUrl: "/images/health-project.jpg",
     githubUrl: "https://github.com/zlundra/portfolio-2026",
-    notebookUrl: "/notebooks/Clinical%20Outcomes%20Predictor%20(Healthcare%20ML).html"
+    notebookUrl:
+      "/notebooks/Clinical%20Outcomes%20Predictor%20%28Healthcare%20ML%29.html",
   },
   {
-    id: "id: "global-real-estate",
+    id: "global-real-estate",
     title: "Global Real Estate Intelligence",
     description:
       "A market intelligence notebook that cleans global property data and builds comparable valuation metrics for cross-market analysis.",
     tags: ["PropTech", "Python", "Analytics", "Feature Engineering", "Jupyter"],
     imageUrl: "/images/proptech-project.jpg",
     githubUrl: "https://github.com/zlundra/portfolio-2026",
-    notebookUrl: "/notebooks/Global%20Real%20Estate%20Intelligence%20(PropTech).html"
-
-"
+    notebookUrl:
+      "/notebooks/Global%20Real%20Estate%20Intelligence%20%28PropTech%29.html",
   },
   {
     id: "public-health",
@@ -47,9 +47,9 @@ const PROJECTS: Project[] = [
     tags: ["Data Engineering", "ETL", "Python", "Quality Checks", "Jupyter"],
     imageUrl: "/images/hero-bg.jpg",
     githubUrl: "https://github.com/zlundra/portfolio-2026",
-    notebookUrl: "/notebooks/Public%20Health%20Surveillance%20(Data%20Engineering).html"
-
-  }
+    notebookUrl:
+      "/notebooks/Public%20Health%20Surveillance%20%28Data%20Engineering%29.html",
+  },
 ];
 
 export default function Projects() {
