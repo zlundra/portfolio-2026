@@ -16,7 +16,6 @@ import { Link, useRoute } from "wouter";
 import { useEffect } from "react";
 
 const GITHUB_REPO = "https://github.com/zlundra/portfolio-2026";
-const COLAB_BASE = "https://colab.research.google.com/github/zlundra/portfolio-2026/blob/main";
 
 type Project = {
   title: string;
@@ -28,12 +27,16 @@ type Project = {
   timeline: string;
   impact: string[];
   stack: string[];
-  /** downloadable .ipynb inside /public/notebooks */
-  notebookPath: string;
-  /** viewable .html inside /public/notebooks */
+
+  /** viewable HTML notebook stored in /public/notebooks */
   notebookUrl: string;
+
+  /** downloadable ipynb stored in /public/notebooks */
+  notebookPath: string;
+
   githubUrl: string;
   demoUrl?: string;
+
   challenge: string;
   solution: string;
   results: string;
@@ -56,7 +59,7 @@ const projects: Record<string, Project> = {
     ],
     stack: ["Python", "Pandas", "Scikit-learn", "Matplotlib", "Jupyter"],
 
-    // IMPORTANT: use parentheses encoding in URLs for reliability
+    // Encode parentheses to avoid URL issues
     notebookUrl:
       "/notebooks/Clinical%20Outcomes%20Predictor%20%28Healthcare%20ML%29.html",
     notebookPath:
@@ -159,9 +162,6 @@ export default function ProjectDetail() {
     );
   }
 
-  // Colab needs the repo path to the IPYNB (not the HTML)
-  const colabUrl = `${COLAB_BASE}/public${project.notebookPath}`;
-
   return (
     <Layout>
       {/* Hero Section */}
@@ -228,7 +228,6 @@ export default function ProjectDetail() {
                   </a>
                 </Button>
 
-                {/* View HTML notebook in browser */}
                 <Button
                   size="lg"
                   variant="outline"
@@ -240,7 +239,6 @@ export default function ProjectDetail() {
                   </a>
                 </Button>
 
-                {/* Optional: download the raw ipynb */}
                 <Button
                   size="lg"
                   variant="outline"
@@ -251,16 +249,10 @@ export default function ProjectDetail() {
                     <Download className="mr-2 h-5 w-5" /> .ipynb
                   </a>
                 </Button>
-
-                <Button size="lg" className="rounded-full" asChild>
-                  <a href={colabUrl} target="_blank" rel="noreferrer">
-                    <ExternalLink className="mr-2 h-5 w-5" /> Run in Colab
-                  </a>
-                </Button>
               </div>
 
               <p className="text-sm text-muted-foreground lg:text-right">
-                Tip: Colab opens the notebook directly from your GitHub repo.
+                Tip: “Notebook” opens the HTML version for easy reading. “.ipynb” downloads the source file.
               </p>
             </div>
           </div>
@@ -276,18 +268,14 @@ export default function ProjectDetail() {
               <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
                 <Zap className="mr-3 text-primary" /> The Challenge
               </h2>
-              <p className="text-muted-foreground leading-relaxed text-lg">
-                {project.challenge}
-              </p>
+              <p className="text-muted-foreground leading-relaxed text-lg">{project.challenge}</p>
             </Card>
 
             <Card className="glass-card p-8 border-t-4 border-t-secondary">
               <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
                 <Layers className="mr-3 text-secondary" /> The Approach
               </h2>
-              <p className="text-muted-foreground leading-relaxed text-lg mb-6">
-                {project.solution}
-              </p>
+              <p className="text-muted-foreground leading-relaxed text-lg mb-6">{project.solution}</p>
               <div className="bg-black/20 rounded-lg p-6 border border-white/5">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                   Key Technologies Used
@@ -306,9 +294,7 @@ export default function ProjectDetail() {
               <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
                 <CheckCircle2 className="mr-3 text-accent" /> Results & Impact
               </h2>
-              <p className="text-muted-foreground leading-relaxed text-lg mb-6">
-                {project.results}
-              </p>
+              <p className="text-muted-foreground leading-relaxed text-lg mb-6">{project.results}</p>
               <ul className="space-y-3">
                 {project.impact.map((item, index) => (
                   <li key={index} className="flex items-start">
