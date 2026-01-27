@@ -51,7 +51,7 @@ const projects: Record<string, Project> = {
       "Packaged results in an executable notebook for review and iteration",
     ],
     stack: ["Python", "Pandas", "Scikit-learn", "Matplotlib", "Jupyter"],
-    notebookPath: "/notebooks/clinical_outcomes_predictor.ipynb",
+    notebookUrl: "/notebooks/Clinical%20Outcomes%20Predictor%20(Healthcare%20ML).html",
     githubUrl: `${GITHUB_REPO}`,
     demoUrl: undefined,
     challenge:
@@ -76,7 +76,7 @@ const projects: Record<string, Project> = {
       "Produced visual summaries suitable for product/investor narratives",
     ],
     stack: ["Python", "Pandas", "Visualization", "Jupyter"],
-    notebookPath: "/notebooks/global_real_estate_intelligence.ipynb",
+    notebookUrl: "/notebooks/Global%20Real%20Estate%20Intelligence%20(PropTech).html",
     githubUrl: `${GITHUB_REPO}`,
     demoUrl: undefined,
     challenge:
@@ -101,7 +101,7 @@ const projects: Record<string, Project> = {
       "Created a repeatable template for public health reporting",
     ],
     stack: ["Python", "Pandas", "Data Cleaning", "Jupyter"],
-    notebookPath: "/notebooks/public_health_surveillance.ipynb",
+    notebookUrl: "/notebooks/Public%20Health%20Surveillance%20(Data%20Engineering).html",
     githubUrl: `${GITHUB_REPO}`,
     demoUrl: undefined,
     challenge:
