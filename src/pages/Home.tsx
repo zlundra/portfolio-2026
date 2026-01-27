@@ -21,22 +21,24 @@ export default function Home() {
         <div className="container relative z-10 text-center">
           <div className="inline-block mb-4 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md">
             <span className="text-sm font-medium text-primary tracking-wide uppercase">
-              Data Scientist • PropTech Specialist • Health Analyst
+              Data Analytics Lead • PropTech & Healthcare • Analytics Engineering
             </span>
           </div>
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold tracking-tight mb-6 text-white drop-shadow-2xl">
-            Decoding Complexity <br />
+            Turning complex data <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-300 to-secondary">
-              Through Data AI
+              into clear decisions
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed font-light">
-            I build advanced predictive models and interactive intelligence systems that bridge the gap between 
-            <span className="text-foreground font-medium"> Real Estate </span> and 
-            <span className="text-foreground font-medium"> Healthcare</span>.
-          </p>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed font-light">
+  I help teams turn complex data into clear reporting—defining KPIs, improving data quality, and delivering dashboards that support decisions in
+  <span className="text-foreground font-medium"> PropTech </span> and
+  <span className="text-foreground font-medium"> Healthcare</span>.
+</p>
+
+
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/projects">
