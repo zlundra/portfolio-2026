@@ -9,6 +9,7 @@ import {
   Github,
   Layers,
   NotebookText,
+  Download,
   Zap,
 } from "lucide-react";
 import { Link, useRoute } from "wouter";
@@ -27,7 +28,10 @@ type Project = {
   timeline: string;
   impact: string[];
   stack: string[];
+  /** downloadable .ipynb inside /public/notebooks */
   notebookPath: string;
+  /** viewable .html inside /public/notebooks */
+  notebookUrl: string;
   githubUrl: string;
   demoUrl?: string;
   challenge: string;
@@ -51,9 +55,16 @@ const projects: Record<string, Project> = {
       "Packaged results in an executable notebook for review and iteration",
     ],
     stack: ["Python", "Pandas", "Scikit-learn", "Matplotlib", "Jupyter"],
-    notebookUrl: "/notebooks/Clinical%20Outcomes%20Predictor%20(Healthcare%20ML).html",
-    githubUrl: `${GITHUB_REPO}`,
+
+    // IMPORTANT: use parentheses encoding in URLs for reliability
+    notebookUrl:
+      "/notebooks/Clinical%20Outcomes%20Predictor%20%28Healthcare%20ML%29.html",
+    notebookPath:
+      "/notebooks/Clinical%20Outcomes%20Predictor%20%28Healthcare%20ML%29.ipynb",
+
+    githubUrl: GITHUB_REPO,
     demoUrl: undefined,
+
     challenge:
       "Clinical datasets can be imbalanced (fewer positive stroke cases), and decisions need clarity and traceability — not just accuracy.",
     solution:
@@ -61,6 +72,7 @@ const projects: Record<string, Project> = {
     results:
       "The notebook produces a transparent baseline model and a clean analysis trail that can be expanded with additional features, tuning, and clinical validation.",
   },
+
   "global-real-estate": {
     title: "Global Real Estate Intelligence",
     subtitle: "Market valuation insights from global housing data",
@@ -76,9 +88,15 @@ const projects: Record<string, Project> = {
       "Produced visual summaries suitable for product/investor narratives",
     ],
     stack: ["Python", "Pandas", "Visualization", "Jupyter"],
-    notebookUrl: "/notebooks/Global%20Real%20Estate%20Intelligence%20(PropTech).html",
-    githubUrl: `${GITHUB_REPO}`,
+
+    notebookUrl:
+      "/notebooks/Global%20Real%20Estate%20Intelligence%20%28PropTech%29.html",
+    notebookPath:
+      "/notebooks/Global%20Real%20Estate%20Intelligence%20%28PropTech%29.ipynb",
+
+    githubUrl: GITHUB_REPO,
     demoUrl: undefined,
+
     challenge:
       "Real estate data is fragmented and inconsistent across markets, so meaningful comparison requires consistent units and derived metrics.",
     solution:
@@ -86,6 +104,7 @@ const projects: Record<string, Project> = {
     results:
       "The notebook produces market snapshots and highlights variation across regions — a foundation for future geospatial enrichment and automated valuation features.",
   },
+
   "public-health": {
     title: "Public Health Surveillance",
     subtitle: "ETL pipeline for vitamin deficiency trends",
@@ -101,9 +120,15 @@ const projects: Record<string, Project> = {
       "Created a repeatable template for public health reporting",
     ],
     stack: ["Python", "Pandas", "Data Cleaning", "Jupyter"],
-    notebookUrl: "/notebooks/Public%20Health%20Surveillance%20(Data%20Engineering).html",
-    githubUrl: `${GITHUB_REPO}`,
+
+    notebookUrl:
+      "/notebooks/Public%20Health%20Surveillance%20%28Data%20Engineering%29.html",
+    notebookPath:
+      "/notebooks/Public%20Health%20Surveillance%20%28Data%20Engineering%29.ipynb",
+
+    githubUrl: GITHUB_REPO,
     demoUrl: undefined,
+
     challenge:
       "Survey-style public health datasets often have missing values and inconsistent categorization, making trend analysis unreliable without careful cleaning.",
     solution:
@@ -134,6 +159,7 @@ export default function ProjectDetail() {
     );
   }
 
+  // Colab needs the repo path to the IPYNB (not the HTML)
   const colabUrl = `${COLAB_BASE}/public${project.notebookPath}`;
 
   return (
@@ -191,15 +217,38 @@ export default function ProjectDetail() {
                   </Button>
                 )}
 
-                <Button size="lg" variant="outline" className="border-white/10 hover:bg-white/5" asChild>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/10 hover:bg-white/5"
+                  asChild
+                >
                   <a href={project.githubUrl} target="_blank" rel="noreferrer">
                     <Github className="mr-2 h-5 w-5" /> Repo
                   </a>
                 </Button>
 
-                <Button size="lg" variant="outline" className="border-white/10 hover:bg-white/5" asChild>
-                  <a href={project.notebookPath} target="_blank" rel="noreferrer">
+                {/* View HTML notebook in browser */}
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/10 hover:bg-white/5"
+                  asChild
+                >
+                  <a href={project.notebookUrl} target="_blank" rel="noreferrer">
                     <NotebookText className="mr-2 h-5 w-5" /> Notebook
+                  </a>
+                </Button>
+
+                {/* Optional: download the raw ipynb */}
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/10 hover:bg-white/5"
+                  asChild
+                >
+                  <a href={project.notebookPath} target="_blank" rel="noreferrer">
+                    <Download className="mr-2 h-5 w-5" /> .ipynb
                   </a>
                 </Button>
 
@@ -209,8 +258,9 @@ export default function ProjectDetail() {
                   </a>
                 </Button>
               </div>
+
               <p className="text-sm text-muted-foreground lg:text-right">
-                Tip: once this repo is on GitHub, Colab will open the notebook instantly.
+                Tip: Colab opens the notebook directly from your GitHub repo.
               </p>
             </div>
           </div>
@@ -226,14 +276,18 @@ export default function ProjectDetail() {
               <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
                 <Zap className="mr-3 text-primary" /> The Challenge
               </h2>
-              <p className="text-muted-foreground leading-relaxed text-lg">{project.challenge}</p>
+              <p className="text-muted-foreground leading-relaxed text-lg">
+                {project.challenge}
+              </p>
             </Card>
 
             <Card className="glass-card p-8 border-t-4 border-t-secondary">
               <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
                 <Layers className="mr-3 text-secondary" /> The Approach
               </h2>
-              <p className="text-muted-foreground leading-relaxed text-lg mb-6">{project.solution}</p>
+              <p className="text-muted-foreground leading-relaxed text-lg mb-6">
+                {project.solution}
+              </p>
               <div className="bg-black/20 rounded-lg p-6 border border-white/5">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                   Key Technologies Used
@@ -252,7 +306,9 @@ export default function ProjectDetail() {
               <h2 className="text-2xl font-display font-bold mb-4 flex items-center">
                 <CheckCircle2 className="mr-3 text-accent" /> Results & Impact
               </h2>
-              <p className="text-muted-foreground leading-relaxed text-lg mb-6">{project.results}</p>
+              <p className="text-muted-foreground leading-relaxed text-lg mb-6">
+                {project.results}
+              </p>
               <ul className="space-y-3">
                 {project.impact.map((item, index) => (
                   <li key={index} className="flex items-start">
