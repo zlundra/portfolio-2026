@@ -28,11 +28,11 @@ type Project = {
   impact: string[];
   stack: string[];
 
-  /** viewable HTML notebook stored in /public/notebooks */
-  notebookUrl: string;
+  /** viewable HTML notebook stored in /public/notebooks (optional for non-notebook projects) */
+  notebookUrl?: string;
 
-  /** downloadable ipynb stored in /public/notebooks */
-  notebookPath: string;
+  /** downloadable ipynb stored in /public/notebooks (optional for non-notebook projects) */
+  notebookPath?: string;
 
   githubUrl: string;
   demoUrl?: string;
@@ -139,6 +139,31 @@ const projects: Record<string, Project> = {
     results:
       "The notebook outputs clean trend tables and simple visuals that can be lifted into dashboards or automated reporting pipelines.",
   },
+
+  "retail-sales-dashboard": {
+    title: "Retail Sales Dashboard",
+    subtitle: "Dash v2+ Interactive Analytics App (Deployed)",
+    description:
+      "A mobile-responsive dashboard built with Dash + Plotly to compare sales periods, weekly trends, and performance by store/department.",
+    image: "/images/retail-dashboard.png",
+    tags: ["Dash", "Plotly", "Python", "Pandas", "Data Visualization", "Deployment"],
+    role: "End-to-end build",
+    timeline: "1–2 days",
+    impact: [
+      "Interactive period comparison with KPI deltas (sales, holiday sales, store count)",
+      "Weekly trend comparison view for fast performance diagnosis",
+      "Top stores + department delta ranking to surface drivers",
+    ],
+    stack: ["Python", "Dash", "Plotly", "Pandas", "Gunicorn", "Render"],
+    githubUrl: "https://github.com/zlundra/dash-retail-sales-dashboard",
+    demoUrl: "https://dash-retail-sales-dashboard.onrender.com/",
+    challenge:
+      "Turn a static dataset into a shareable, interactive dashboard that non-technical users can explore on desktop and mobile.",
+    solution:
+      "Implemented responsive layout with Dash Bootstrap Components, clean KPI cards, and interactive charts with dropdown-driven comparisons.",
+    results:
+      "A production-ready Dash app deployed from GitHub to Render, linked directly from the portfolio as a live demo.",
+  },
 };
 
 export default function ProjectDetail() {
@@ -204,7 +229,7 @@ export default function ProjectDetail() {
             </div>
 
             <div className="flex flex-col gap-3 lg:items-end">
-              <div className="flex flex-wrap gap-3 lg:justify-end">
+              <div className="flex flex-wrap gap-4 lg:justify-end">
                 {project.demoUrl && (
                   <Button
                     size="lg"
@@ -228,32 +253,38 @@ export default function ProjectDetail() {
                   </a>
                 </Button>
 
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/10 hover:bg-white/5"
-                  asChild
-                >
-                  <a href={project.notebookUrl} target="_blank" rel="noreferrer">
-                    <NotebookText className="mr-2 h-5 w-5" /> Notebook
-                  </a>
-                </Button>
+                {project.notebookUrl && (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/10 hover:bg-white/5"
+                    asChild
+                  >
+                    <a href={project.notebookUrl} target="_blank" rel="noreferrer">
+                      <NotebookText className="mr-2 h-5 w-5" /> Notebook
+                    </a>
+                  </Button>
+                )}
 
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/10 hover:bg-white/5"
-                  asChild
-                >
-                  <a href={project.notebookPath} target="_blank" rel="noreferrer">
-                    <Download className="mr-2 h-5 w-5" /> .ipynb
-                  </a>
-                </Button>
+                {project.notebookPath && (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/10 hover:bg-white/5"
+                    asChild
+                  >
+                    <a href={project.notebookPath} target="_blank" rel="noreferrer">
+                      <Download className="mr-2 h-5 w-5" /> .ipynb
+                    </a>
+                  </Button>
+                )}
               </div>
 
-              <p className="text-sm text-muted-foreground lg:text-right">
-                Tip: “Notebook” opens the HTML version for easy reading. “.ipynb” downloads the source file.
-              </p>
+              {(project.notebookUrl || project.notebookPath) && (
+                <p className="text-sm text-muted-foreground lg:text-right">
+                  Tip: “Notebook” opens the HTML version for easy reading. “.ipynb” downloads the source file.
+                </p>
+              )}
             </div>
           </div>
         </div>

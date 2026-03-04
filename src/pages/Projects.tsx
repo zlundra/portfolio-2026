@@ -50,6 +50,16 @@ const PROJECTS: Project[] = [
     notebookUrl:
       "/notebooks/Public%20Health%20Surveillance%20%28Data%20Engineering%29.html",
   },
+  {
+    id: "retail-sales-dashboard",
+    title: "Retail Sales Dashboard (Dash + Plotly)",
+    description:
+      "Mobile-responsive interactive dashboard to compare monthly performance, weekly trends, and top stores/departments.",
+    tags: ["Dash", "Plotly", "Python", "Pandas", "Deployment", "Responsive UI"],
+    imageUrl: "/images/retail-dashboard.png",
+    githubUrl: "https://github.com/zlundra/dash-retail-sales-dashboard",
+    demoUrl: "https://dash-retail-sales-dashboard.onrender.com/",
+  },
 ];
 
 export default function Projects() {
@@ -59,7 +69,10 @@ export default function Projects() {
     const q = query.trim().toLowerCase();
     if (!q) return PROJECTS;
     return PROJECTS.filter((p) =>
-      [p.title, p.description, p.tags.join(" ")].join(" ").toLowerCase().includes(q)
+      [p.title, p.description, p.tags.join(" ")]
+        .join(" ")
+        .toLowerCase()
+        .includes(q)
     );
   }, [query]);
 
@@ -68,9 +81,11 @@ export default function Projects() {
       <div className="container py-20">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-14">
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-6xl font-display font-bold">Projects</h1>
+            <h1 className="text-4xl md:text-6xl font-display font-bold">
+              Projects
+            </h1>
             <p className="text-xl text-muted-foreground max-w-2xl">
-              Three portfolio projects that showcase analytics engineering, BI-ready thinking, and applied modelling.
+              Four portfolio projects showcasing analytics engineering, BI-ready thinking, applied modelling, and deployable data apps.
             </p>
           </div>
 
@@ -84,8 +99,16 @@ export default function Projects() {
                 className="pl-10"
               />
             </div>
-            <a href="https://github.com/zlundra" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="border-white/10 hover:bg-white/5" aria-label="Open GitHub">
+            <a
+              href="https://github.com/zlundra"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button
+                variant="outline"
+                className="border-white/10 hover:bg-white/5"
+                aria-label="Open GitHub"
+              >
                 <Github className="h-4 w-4" />
               </Button>
             </a>
