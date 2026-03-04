@@ -50,6 +50,17 @@ const PROJECTS: Project[] = [
     notebookUrl:
       "/notebooks/Public%20Health%20Surveillance%20%28Data%20Engineering%29.html",
   },
+  {
+  id: "retail-sales-dashboard",
+  title: "Retail Sales Dashboard (Dash + Plotly)",
+  description:
+    "Mobile-responsive interactive dashboard to compare monthly performance, weekly trends, and top stores/departments.",
+  tags: ["Dash", "Plotly", "Python", "Pandas", "Deployment", "Responsive UI"],
+  imageUrl: "/images/retail-dashboard.png",
+  githubUrl: "https://github.com/zlundra/dash-retail-sales-dashboard",
+  demoUrl: "https://dash-retail-sales-dashboard.onrender.com/",
+  category: "Data Apps"
+},
 ];
 
 export default function Projects() {
