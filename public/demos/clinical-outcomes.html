@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinical Outcomes Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg: #0e0c1a; --s1: #16132a; --s2: #1e1a38;
+  --border: rgba(175,169,236,.12); --border-hi: rgba(175,169,236,.3);
+  --purple: #7c5cfc; --pL: #afa9ec; --mint: #1d9e75;
+  --amber: #ef9f27; --red: #e24b4a; --text: #eeedfe; --muted: #6a6a8a;
+  --mono: 'DM Mono', monospace; --display: 'Syne', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; }
+nav { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(14,12,26,.92); backdrop-filter: blur(12px); z-index: 100; }
+.nav-logo { font-family: var(--display); font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: .6rem; }
+.nav-logo span { color: var(--pL); }
+.nav-tabs { display: flex; gap: .25rem; }
+.nav-tab { background: transparent; border: 1px solid transparent; color: var(--muted); font-family: var(--mono); font-size: .75rem; padding: .4rem 1rem; border-radius: .35rem; cursor: pointer; transition: all .2s; }
+.nav-tab:hover { color: var(--text); border-color: var(--border-hi); }
+.nav-tab.on { background: rgba(124,92,252,.15); border-color: rgba(124,92,252,.4); color: var(--pL); }
+.panel { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; animation: fadeIn .3s ease; }
+.panel.on { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.s-label { font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; color: var(--pL); margin-bottom: .5rem; }
+.s-title { font-family: var(--display); font-size: 1.6rem; font-weight: 700; margin-bottom: .5rem; }
+.s-sub { font-size: .78rem; color: var(--muted); margin-bottom: 1.75rem; line-height: 1.6; }
+.metric-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
+.metric { background: var(--s1); border: 1px solid var(--border); border-radius: .75rem; padding: 1.25rem; }
+.metric-label { font-size: .65rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: .5rem; }
+.metric-val { font-family: var(--display); font-size: 1.8rem; font-weight: 700; }
+.metric-delta { font-size: .65rem; color: var(--muted); margin-top: .3rem; }
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+.chart-card { background: var(--s1); border: 1px solid var(--border); border-radius: .75rem; padding: 1.5rem; }
+.chart-title { font-family: var(--display); font-size: .85rem; font-weight: 600; margin-bottom: .25rem; }
+.chart-sub { font-size: .65rem; color: var(--muted); margin-bottom: 1.25rem; }
+.chart-wrap { position: relative; }
+.feature-list { display: flex; flex-direction: column; gap: .6rem; }
+.feature-row { display: flex; align-items: center; gap: .75rem; font-size: .72rem; }
+.feature-label { width: 160px; color: var(--muted); flex-shrink: 0; }
+.feature-bar-track { flex: 1; height: 6px; background: rgba(255,255,255,.06); border-radius: 3px; overflow: hidden; }
+.feature-fill { height: 100%; border-radius: 3px; }
+.feature-val { width: 40px; text-align: right; font-weight: 500; font-size: .7rem; }
+.conf-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.cm-cell { border: 1px solid var(--border); border-radius: .5rem; padding: 1.25rem; text-align: center; }
+.cm-label { font-size: .62rem; color: var(--muted); margin-bottom: .5rem; letter-spacing: .06em; text-transform: uppercase; }
+.cm-val { font-family: var(--display); font-size: 1.8rem; font-weight: 700; }
+.cm-sub { font-size: .6rem; color: var(--muted); margin-top: .2rem; }
+.stack-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.5rem; }
+.stack-pill { font-size: .65rem; padding: .25rem .75rem; border-radius: 100px; border: 1px solid var(--border-hi); color: var(--pL); background: rgba(124,92,252,.08); }
+.legend { display: flex; gap: 1.25rem; margin-bottom: .75rem; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: .4rem; font-size: .65rem; color: var(--muted); }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.roc-info { font-size: .7rem; color: var(--muted); margin-top: .75rem; }
+.pipeline { display: flex; gap: .5rem; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; }
+.pipe-step { background: var(--s1); border: 1px solid var(--border); border-radius: .5rem; padding: .75rem 1.1rem; font-size: .72rem; flex: 1; min-width: 120px; text-align: center; }
+.pipe-step-title { font-family: var(--display); font-size: .8rem; font-weight: 600; margin-bottom: .2rem; }
+.pipe-step-sub { font-size: .6rem; color: var(--muted); }
+.pipe-arrow { color: var(--muted); font-size: 1.1rem; flex-shrink: 0; }
+@media(max-width:700px) { .metric-row { grid-template-columns: 1fr 1fr; } .chart-grid { grid-template-columns: 1fr; } nav { padding: 1rem; } .nav-tabs { gap:.1rem; } .nav-tab { padding:.35rem .6rem; font-size:.65rem; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">MaLux <span>·</span> Clinical Outcomes Predictor</div>
+  <div class="nav-tabs">
+    <button class="nav-tab on" onclick="show('overview',this)">Overview</button>
+    <button class="nav-tab" onclick="show('features',this)">Risk factors</button>
+    <button class="nav-tab" onclick="show('model',this)">Model performance</button>
+    <button class="nav-tab" onclick="show('pipeline',this)">Pipeline</button>
+  </div>
+</nav>
+
+<!-- OVERVIEW -->
+<div class="panel on" id="overview">
+  <div class="s-label">Portfolio Project · MaLux Data Consulting</div>
+  <div class="s-title">Stroke Risk Prediction</div>
+  <div class="s-sub">Reproducible ML pipeline for stroke risk screening. Baseline logistic regression model trained on clinical survey data with interpretable features and clear validation outputs.</div>
+
+  <div class="metric-row">
+    <div class="metric">
+      <div class="metric-label">Records</div>
+      <div class="metric-val">5,110</div>
+      <div class="metric-delta">after cleaning</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Stroke positive</div>
+      <div class="metric-val" style="color:var(--red)">4.9%</div>
+      <div class="metric-delta" style="color:var(--muted)">class imbalance handled</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">ROC-AUC</div>
+      <div class="metric-val" style="color:var(--mint)">0.84</div>
+      <div class="metric-delta" style="color:var(--mint)">baseline model</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Features used</div>
+      <div class="metric-val">11</div>
+      <div class="metric-delta">clinical + demographic</div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Stroke prevalence by age group</div>
+      <div class="chart-sub">Incidence rate rises sharply above age 60</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#e24b4a"></span>Stroke positive</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#534ab7"></span>No stroke</span>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="ageChart" role="img" aria-label="Bar chart showing stroke prevalence by age group. Risk increases sharply above age 60.">Stroke prevalence rises from under 1% in young adults to over 12% in those aged 80+.</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Avg glucose by stroke outcome</div>
+      <div class="chart-sub">Higher average glucose correlates with positive cases</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#e24b4a"></span>Stroke</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#534ab7"></span>No stroke</span>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="glucoseChart" role="img" aria-label="Bar chart showing average glucose levels by stroke outcome. Stroke patients show higher average glucose.">Average glucose is higher in stroke-positive patients (132 mg/dL) vs no-stroke (103 mg/dL).</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack-row">
+    <span class="stack-pill">Python</span><span class="stack-pill">Pandas</span><span class="stack-pill">Scikit-learn</span>
+    <span class="stack-pill">Matplotlib</span><span class="stack-pill">Jupyter</span><span class="stack-pill">SMOTE</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="panel" id="features">
+  <div class="s-label">Feature analysis</div>
+  <div class="s-title">Top risk drivers</div>
+  <div class="s-sub">Feature importance from the baseline logistic regression model. Age, hypertension, and average glucose are the strongest predictors of stroke risk.</div>
+
+  <div class="chart-card" style="margin-bottom:1.5rem">
+    <div class="chart-title">Feature importance scores</div>
+    <div class="chart-sub">Normalised coefficient magnitude from logistic regression</div>
+    <div style="margin-top:1rem" class="feature-list" id="featureList"></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Hypertension vs stroke rate</div>
+      <div class="chart-sub">Patients with hypertension show significantly higher incidence</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#e24b4a"></span>Stroke %</span>
+      </div>
+      <div class="chart-wrap" style="height:180px">
+        <canvas id="htChart" role="img" aria-label="Bar chart comparing stroke rates in patients with and without hypertension.">Stroke rate is 13.1% in hypertensive patients vs 3.8% in non-hypertensive patients.</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Stroke rate by smoking status</div>
+      <div class="chart-sub">Former smokers show elevated risk profile</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#7c5cfc"></span>Stroke %</span>
+      </div>
+      <div class="chart-wrap" style="height:180px">
+        <canvas id="smokeChart" role="img" aria-label="Bar chart showing stroke rates by smoking status.">Former smokers show the highest stroke rate at 7.8%, followed by ever-smoked at 5.9%.</canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODEL PERFORMANCE -->
+<div class="panel" id="model">
+  <div class="s-label">Model evaluation</div>
+  <div class="s-title">Baseline performance</div>
+  <div class="s-sub">Logistic regression baseline trained on stratified 80/20 split. Class imbalance handled with SMOTE on training set. All evaluation on held-out test set only.</div>
+
+  <div class="chart-grid" style="margin-bottom:1.5rem">
+    <div class="chart-card">
+      <div class="chart-title">ROC curve</div>
+      <div class="chart-sub">AUC = 0.84 · baseline model</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#7c5cfc"></span>Logistic regression</span>
+        <span class="legend-item"><span class="legend-dot" style="background:rgba(175,169,236,.25)"></span>Random baseline</span>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="rocChart" role="img" aria-label="ROC curve showing model performance with AUC of 0.84, compared to random baseline.">The model achieves AUC of 0.84, significantly above the random baseline of 0.5.</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Confusion matrix</div>
+      <div class="chart-sub">Threshold 0.3 · optimised for sensitivity in screening context</div>
+      <div style="margin-top:1rem" class="conf-matrix">
+        <div class="cm-cell" style="border-color:rgba(29,158,117,.3)">
+          <div class="cm-label">True Negative</div>
+          <div class="cm-val" style="color:var(--mint)">891</div>
+          <div class="cm-sub">correctly non-stroke</div>
+        </div>
+        <div class="cm-cell" style="border-color:rgba(239,159,39,.3)">
+          <div class="cm-label">False Positive</div>
+          <div class="cm-val" style="color:var(--amber)">83</div>
+          <div class="cm-sub">over-flagged</div>
+        </div>
+        <div class="cm-cell" style="border-color:rgba(239,159,39,.3)">
+          <div class="cm-label">False Negative</div>
+          <div class="cm-val" style="color:var(--amber)">9</div>
+          <div class="cm-sub">missed cases</div>
+        </div>
+        <div class="cm-cell" style="border-color:rgba(29,158,117,.3)">
+          <div class="cm-label">True Positive</div>
+          <div class="cm-val" style="color:var(--mint)">39</div>
+          <div class="cm-sub">correctly flagged</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Precision · Recall · F1 by threshold</div>
+    <div class="chart-sub">Threshold 0.3 selected to maximise recall — in a screening context, missing a true case is more costly than a false flag</div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#7c5cfc"></span>Precision</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#1d9e75"></span>Recall</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#ef9f27"></span>F1</span>
+    </div>
+    <div class="chart-wrap" style="height:200px">
+      <canvas id="prChart" role="img" aria-label="Line chart showing precision, recall, and F1 score across classification thresholds from 0.1 to 0.9.">At threshold 0.3, recall reaches 0.81 while precision is 0.32 and F1 is 0.46. Higher thresholds improve precision but reduce recall.</canvas>
+    </div>
+  </div>
+</div>
+
+<!-- PIPELINE -->
+<div class="panel" id="pipeline">
+  <div class="s-label">Technical architecture</div>
+  <div class="s-title">ETL → model pipeline</div>
+  <div class="s-sub">Fully reproducible pipeline designed to be extendable into a scheduled refresh job. All steps are parameterised and logged.</div>
+
+  <div class="pipeline">
+    <div class="pipe-step"><div class="pipe-step-title">Ingest</div><div class="pipe-step-sub">CSV load · 5,110 raw rows · type validation</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-title">Clean</div><div class="pipe-step-sub">Null imputation · BMI median · smoking mode</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-title">Encode</div><div class="pipe-step-sub">One-hot categoricals · standard scale numerics</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-title">Balance</div><div class="pipe-step-sub">SMOTE on train set · 80/20 stratified split</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-title">Train</div><div class="pipe-step-sub">Logistic regression · C=0.1 · liblinear</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-step-title">Evaluate</div><div class="pipe-step-sub">AUC · confusion matrix · threshold optimisation</div></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Missing values before & after imputation</div>
+    <div class="chart-sub">BMI had 201 missing values (3.9%) — imputed with median stratified by gender</div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#e24b4a"></span>Before</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#1d9e75"></span>After</span>
+    </div>
+    <div class="chart-wrap" style="height:180px">
+      <canvas id="missingChart" role="img" aria-label="Bar chart comparing missing value counts before and after imputation for key fields.">BMI had 201 missing values before imputation, reduced to 0 after. Smoking status had 1,544 unknown values handled via mode imputation per age group.</canvas>
+    </div>
+  </div>
+
+  <div class="stack-row">
+    <span class="stack-pill">Python 3.11</span><span class="stack-pill">Pandas</span><span class="stack-pill">Scikit-learn</span>
+    <span class="stack-pill">imbalanced-learn (SMOTE)</span><span class="stack-pill">Matplotlib</span><span class="stack-pill">Jupyter</span>
+  </div>
+</div>
+
+<script>
+const C = {
+  purple: '#7c5cfc', pL: '#afa9ec', mint: '#1d9e75',
+  amber: '#ef9f27', red: '#e24b4a', muted: 'rgba(175,169,236,.3)',
+  gridLine: 'rgba(175,169,236,.08)', tick: 'rgba(175,169,236,.5)'
+};
+const baseOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: C.gridLine }, ticks: { color: C.tick, font: { family: "'DM Mono'" , size: 10 } } },
+    y: { grid: { color: C.gridLine }, ticks: { color: C.tick, font: { family: "'DM Mono'", size: 10 } } }
+  }
+};
+
+// Age chart
+new Chart(document.getElementById('ageChart'), {
+  type: 'bar',
+  data: {
+    labels: ['18–30','31–40','41–50','51–60','61–70','71–80','80+'],
+    datasets: [
+      { label: 'Stroke %', data: [0.4, 0.8, 1.9, 4.1, 8.7, 10.9, 12.4], backgroundColor: C.red, borderRadius: 3 },
+      { label: 'No stroke %', data: [99.6, 99.2, 98.1, 95.9, 91.3, 89.1, 87.6], backgroundColor: 'rgba(83,74,183,.35)', borderRadius: 3 }
+    ]
+  },
+  options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => v + '%' } } } }
+});
+
+// Glucose chart
+new Chart(document.getElementById('glucoseChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Stroke', 'No stroke'],
+    datasets: [{ data: [132, 103], backgroundColor: [C.red, 'rgba(83,74,183,.5)'], borderRadius: 4 }]
+  },
+  options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, min: 80, ticks: { ...baseOpts.scales.y.ticks, callback: v => v + ' mg/dL' } } } }
+});
+
+// Feature importance
+const features = [
+  { label: 'Age', val: 0.91, color: C.red },
+  { label: 'Hypertension', val: 0.78, color: C.red },
+  { label: 'Avg glucose', val: 0.72, color: C.amber },
+  { label: 'Heart disease', val: 0.65, color: C.amber },
+  { label: 'BMI', val: 0.48, color: C.pL },
+  { label: 'Smoking (former)', val: 0.41, color: C.pL },
+  { label: 'Ever married', val: 0.33, color: C.muted },
+  { label: 'Residence type', val: 0.18, color: C.muted },
+];
+document.getElementById('featureList').innerHTML = features.map(f => `
+  <div class="feature-row">
+    <span class="feature-label">${f.label}</span>
+    <div class="feature-bar-track"><div class="feature-fill" style="width:${Math.round(f.val*100)}%;background:${f.color}"></div></div>
+    <span class="feature-val" style="color:${f.color}">${f.val.toFixed(2)}</span>
+  </div>
+`).join('');
+
+// Hypertension chart
+new Chart(document.getElementById('htChart'), {
+  type: 'bar',
+  data: {
+    labels: ['No hypertension', 'Hypertension'],
+    datasets: [{ data: [3.8, 13.1], backgroundColor: [C.pL, C.red], borderRadius: 4 }]
+  },
+  options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => v + '%' } } } }
+});
+
+// Smoking chart
+new Chart(document.getElementById('smokeChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Never', 'Unknown', 'Ever smoked', 'Formerly'],
+    datasets: [{ data: [3.2, 4.4, 5.9, 7.8], backgroundColor: 'rgba(124,92,252,.6)', borderRadius: 4 }]
+  },
+  options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => v + '%' } } } }
+});
+
+// ROC curve
+const rocX = [0,0.02,0.05,0.09,0.14,0.2,0.28,0.37,0.48,0.6,0.73,0.84,0.92,0.97,1.0];
+const rocY = [0,0.18,0.34,0.47,0.58,0.67,0.74,0.80,0.85,0.89,0.92,0.95,0.97,0.99,1.0];
+new Chart(document.getElementById('rocChart'), {
+  type: 'line',
+  data: {
+    datasets: [
+      { label: 'Model', data: rocX.map((x,i) => ({x,y:rocY[i]})), borderColor: C.purple, backgroundColor: 'rgba(124,92,252,.08)', fill: true, pointRadius: 0, borderWidth: 2, tension: 0.4 },
+      { label: 'Random', data: [{x:0,y:0},{x:1,y:1}], borderColor: C.muted, borderDash: [4,4], pointRadius: 0, borderWidth: 1 }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales: { x: { type:'linear', min:0, max:1, title:{display:true,text:'False positive rate',color:C.tick,font:{size:10,family:"'DM Mono'"}}, grid:{color:C.gridLine}, ticks:{color:C.tick,font:{size:9,family:"'DM Mono'"}} }, y: { min:0, max:1, title:{display:true,text:'True positive rate',color:C.tick,font:{size:10,family:"'DM Mono'"}}, grid:{color:C.gridLine}, ticks:{color:C.tick,font:{size:9,family:"'DM Mono'"}} } } }
+});
+
+// PR chart
+const thresholds = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9];
+const precision  = [0.12,0.21,0.32,0.44,0.55,0.64,0.71,0.78,0.84];
+const recall     = [0.96,0.89,0.81,0.71,0.61,0.50,0.40,0.29,0.17];
+const f1         = thresholds.map((_,i) => +(2*precision[i]*recall[i]/(precision[i]+recall[i])).toFixed(2));
+new Chart(document.getElementById('prChart'), {
+  type: 'line',
+  data: {
+    labels: thresholds.map(t => t.toFixed(1)),
+    datasets: [
+      { label: 'Precision', data: precision, borderColor: C.purple, pointRadius: 3, borderWidth: 2, tension: 0.3 },
+      { label: 'Recall',    data: recall,    borderColor: C.mint,   pointRadius: 3, borderWidth: 2, tension: 0.3 },
+      { label: 'F1',        data: f1,        borderColor: C.amber,  pointRadius: 3, borderWidth: 2, tension: 0.3 }
+    ]
+  },
+  options: { ...baseOpts, scales: { x: { ...baseOpts.scales.x, title: {display:true,text:'Threshold',color:C.tick,font:{size:10}} }, y: { ...baseOpts.scales.y, min: 0, max: 1 } } }
+});
+
+// Missing values
+new Chart(document.getElementById('missingChart'), {
+  type: 'bar',
+  data: {
+    labels: ['BMI', 'Smoking status', 'Age', 'Glucose'],
+    datasets: [
+      { label: 'Before', data: [201, 1544, 0, 0], backgroundColor: C.red, borderRadius: 3 },
+      { label: 'After',  data: [0, 0, 0, 0],      backgroundColor: C.mint, borderRadius: 3 }
+    ]
+  },
+  options: { ...baseOpts, plugins: { legend: { display: false } } }
+});
+
+function show(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+}
+</script>
+</body>
+</html>

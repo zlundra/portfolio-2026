@@ -13,48 +13,37 @@ type Project = {
   imageUrl: string;
   githubUrl?: string;
   demoUrl?: string;
-  notebookUrl?: string; // this should point to the HTML notebook
+  notebookUrl?: string;
 };
 
 const PROJECTS: Project[] = [
   {
+    id: "crm-data-quality",
+    title: "CRM Data Quality Remediation Engine",
+    description:
+      "3-layer resolution framework applied to 42k healthcare registrant records — raising data maturity from 11/25 to 19/25 and completeness from 61% to 94%.",
+    tags: ["Data Quality", "Healthcare", "Python", "SQL", "CRM", "Fuzzy Matching"],
+    imageUrl: "/images/health-project.jpeg",
+    githubUrl: "https://github.com/zlundra/portfolio-2026",
+    demoUrl: "/demos/crm-data-quality.html",
+  },
+  {
     id: "clinical-outcomes",
     title: "Clinical Outcomes Predictor",
     description:
-      "An applied analytics + ML notebook exploring stroke risk factors and building a baseline risk model using the public stroke dataset.",
-    tags: ["Healthcare", "Python", "ML (baseline)", "Data Cleaning", "Jupyter"],
-    imageUrl: "/images/health-project.jpg",
+      "Reproducible ML pipeline for stroke risk screening. Baseline logistic regression with SMOTE, stratified validation, and interpretable risk factor analysis.",
+    tags: ["Healthcare", "Python", "Machine Learning", "Data Cleaning", "Jupyter"],
+    imageUrl: "/images/health-project.jpeg",
     githubUrl: "https://github.com/zlundra/portfolio-2026",
+    demoUrl: "/demos/clinical-outcomes.html",
     notebookUrl:
       "/notebooks/Clinical%20Outcomes%20Predictor%20%28Healthcare%20ML%29.html",
   },
   {
-    id: "global-real-estate",
-    title: "Global Real Estate Intelligence",
-    description:
-      "A market intelligence notebook that cleans global property data and builds comparable valuation metrics for cross-market analysis.",
-    tags: ["PropTech", "Python", "Analytics", "Feature Engineering", "Jupyter"],
-    imageUrl: "/images/proptech-project.jpg",
-    githubUrl: "https://github.com/zlundra/portfolio-2026",
-    notebookUrl:
-      "/notebooks/Global%20Real%20Estate%20Intelligence%20%28PropTech%29.html",
-  },
-  {
-    id: "public-health",
-    title: "Public Health Surveillance",
-    description:
-      "An ETL-style notebook that profiles vitamin deficiency data and produces trend-ready tables for dashboards and reporting.",
-    tags: ["Data Engineering", "ETL", "Python", "Quality Checks", "Jupyter"],
-    imageUrl: "/images/hero-bg.jpg",
-    githubUrl: "https://github.com/zlundra/portfolio-2026",
-    notebookUrl:
-      "/notebooks/Public%20Health%20Surveillance%20%28Data%20Engineering%29.html",
-  },
-  {
     id: "retail-sales-dashboard",
-    title: "Retail Sales Dashboard (Dash + Plotly)",
+    title: "Retail Sales Dashboard",
     description:
-      "Mobile-responsive interactive dashboard to compare monthly performance, weekly trends, and top stores/departments.",
+      "Mobile-responsive interactive dashboard to compare monthly performance, weekly trends, and top stores/departments. Live on Render.",
     tags: ["Dash", "Plotly", "Python", "Pandas", "Deployment", "Responsive UI"],
     imageUrl: "/images/retail-dashboard.png",
     githubUrl: "https://github.com/zlundra/dash-retail-sales-dashboard",
@@ -81,14 +70,11 @@ export default function Projects() {
       <div className="container py-20">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-14">
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-6xl font-display font-bold">
-              Projects
-            </h1>
+            <h1 className="text-4xl md:text-6xl font-display font-bold">Projects</h1>
             <p className="text-xl text-muted-foreground max-w-2xl">
-              Four portfolio projects showcasing analytics engineering, BI-ready thinking, applied modelling, and deployable data apps.
+              Three projects spanning data quality engineering, clinical ML, and deployed analytics — across Healthcare and Retail.
             </p>
           </div>
-
           <div className="flex gap-3 items-center w-full md:w-auto">
             <div className="relative w-full md:w-[360px]">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -99,31 +85,21 @@ export default function Projects() {
                 className="pl-10"
               />
             </div>
-            <a
-              href="https://github.com/zlundra"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button
-                variant="outline"
-                className="border-white/10 hover:bg-white/5"
-                aria-label="Open GitHub"
-              >
+            <a href="https://github.com/zlundra" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-white/10 hover:bg-white/5" aria-label="Open GitHub">
                 <Github className="h-4 w-4" />
               </Button>
             </a>
           </div>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filtered.map((p) => (
             <ProjectCard key={p.id} {...p} />
           ))}
         </div>
-
         {filtered.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-muted-foreground">No projects match “{query}”.</p>
+            <p className="text-muted-foreground">No projects match "{query}".</p>
           </div>
         )}
       </div>

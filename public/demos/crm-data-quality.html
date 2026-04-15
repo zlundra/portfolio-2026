@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Data Quality Remediation Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0c1a;
+  --s1: #16132a;
+  --s2: #1e1a38;
+  --border: rgba(175,169,236,.12);
+  --border-hi: rgba(175,169,236,.3);
+  --purple: #7c5cfc;
+  --pL: #afa9ec;
+  --pD: #26215c;
+  --mint: #1d9e75;
+  --amber: #ef9f27;
+  --red: #e24b4a;
+  --text: #eeedfe;
+  --muted: #6a6a8a;
+  --mono: 'DM Mono', monospace;
+  --display: 'Syne', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; }
+
+/* NAV */
+nav { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(14,12,26,.92); backdrop-filter: blur(12px); z-index: 100; }
+.nav-logo { font-family: var(--display); font-weight: 700; font-size: 1rem; color: var(--text); display: flex; align-items: center; gap: .6rem; }
+.nav-logo span { color: var(--pL); }
+.nav-tabs { display: flex; gap: .25rem; }
+.nav-tab { background: transparent; border: 1px solid transparent; color: var(--muted); font-family: var(--mono); font-size: .75rem; padding: .4rem 1rem; border-radius: .35rem; cursor: pointer; transition: all .2s; }
+.nav-tab:hover { color: var(--text); border-color: var(--border-hi); }
+.nav-tab.on { background: rgba(124,92,252,.15); border-color: rgba(124,92,252,.4); color: var(--pL); }
+.badge { font-size: .6rem; padding: .15rem .5rem; border-radius: 100px; font-family: var(--mono); font-weight: 500; display: inline-block; }
+.badge-ok { background: rgba(29,158,117,.15); color: var(--mint); border: 1px solid rgba(29,158,117,.3); }
+.badge-warn { background: rgba(239,159,39,.12); color: var(--amber); border: 1px solid rgba(239,159,39,.3); }
+.badge-err { background: rgba(226,75,74,.12); color: var(--red); border: 1px solid rgba(226,75,74,.3); }
+.badge-p { background: rgba(124,92,252,.15); color: var(--pL); border: 1px solid rgba(124,92,252,.3); }
+
+/* PANELS */
+.panel { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; animation: fadeIn .3s ease; }
+.panel.on { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* METRICS */
+.metric-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.metric { background: var(--s1); border: 1px solid var(--border); border-radius: .75rem; padding: 1.25rem; }
+.metric-label { font-size: .65rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: .5rem; }
+.metric-val { font-family: var(--display); font-size: 1.8rem; font-weight: 700; }
+.metric-delta { font-size: .65rem; color: var(--muted); margin-top: .3rem; }
+
+/* FUNNEL */
+.funnel { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 2rem; }
+.f-step { display: flex; align-items: center; gap: 1rem; }
+.f-bar-wrap { flex: 1; }
+.f-bar { height: 48px; border-radius: .5rem; display: flex; align-items: center; padding: 0 1.25rem; justify-content: space-between; transition: width .8s cubic-bezier(.4,0,.2,1); }
+.f-name { font-family: var(--display); font-size: .8rem; font-weight: 600; }
+.f-sub { font-size: .6rem; margin-top: .15rem; opacity: .75; font-family: var(--mono); }
+.f-count { font-family: var(--display); font-size: 1rem; font-weight: 700; text-align: right; }
+.f-pct { font-size: .6rem; opacity: .7; }
+.f-connector { width: 2px; height: 16px; background: var(--border-hi); margin-left: 1.5rem; }
+
+/* RECORDS */
+.rec-filter { display: flex; gap: .5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.rec-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: .7rem; padding: .35rem .85rem; border-radius: .35rem; cursor: pointer; transition: all .2s; }
+.rec-btn:hover { border-color: var(--border-hi); color: var(--text); }
+.rec-btn.on { background: rgba(124,92,252,.15); border-color: rgba(124,92,252,.4); color: var(--pL); }
+.rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+.rec-card { background: var(--s1); border: 1px solid var(--border); border-radius: .75rem; padding: 1.25rem; transition: border-color .2s; }
+.rec-card:hover { border-color: var(--border-hi); }
+.rec-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .9rem; }
+.rec-name { font-family: var(--display); font-size: .95rem; font-weight: 600; }
+.rec-id { font-size: .6rem; color: var(--muted); margin-top: .15rem; }
+.rec-row { display: flex; justify-content: space-between; font-size: .68rem; padding: .35rem 0; border-top: 1px solid var(--border); }
+.rec-key { color: var(--muted); }
+.rec-val { font-family: var(--mono); }
+.rec-note { font-size: .62rem; color: var(--muted); margin-top: .75rem; padding-top: .75rem; border-top: 1px solid var(--border); line-height: 1.5; }
+
+/* BEFORE/AFTER */
+.ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+.ba-card { background: var(--s1); border: 1px solid var(--border); border-radius: .75rem; padding: 1.5rem; }
+.ba-title { font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.25rem; font-weight: 500; }
+.score-row { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; font-size: .7rem; }
+.score-label { width: 140px; color: var(--muted); flex-shrink: 0; }
+.score-track { flex: 1; height: 5px; background: rgba(255,255,255,.06); border-radius: 3px; overflow: hidden; }
+.score-fill { height: 100%; border-radius: 3px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+.score-val { width: 38px; text-align: right; font-weight: 500; font-size: .72rem; }
+.delta { font-size: .58rem; padding: .1rem .4rem; border-radius: 100px; margin-left: .2rem; }
+.d-up { background: rgba(29,158,117,.15); color: var(--mint); }
+.d-dn { background: rgba(226,75,74,.12); color: var(--red); }
+.maturity-block { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+.maturity-score { font-family: var(--display); font-size: 2.2rem; font-weight: 700; margin-top: .25rem; }
+.maturity-label { font-size: .65rem; color: var(--muted); margin-top: .2rem; }
+
+/* FRAMEWORK */
+.rule-list { display: flex; flex-direction: column; gap: .75rem; }
+.rule-item { background: var(--s1); border: 1px solid var(--border); border-radius: .75rem; padding: 1.25rem; display: flex; gap: 1rem; }
+.rule-num { font-size: .65rem; font-weight: 600; padding: .25rem .75rem; border-radius: .35rem; flex-shrink: 0; margin-top: .1rem; align-self: flex-start; white-space: nowrap; }
+.rule-title { font-family: var(--display); font-size: .9rem; font-weight: 600; margin-bottom: .4rem; }
+.rule-desc { font-size: .72rem; color: var(--muted); line-height: 1.7; margin-bottom: .5rem; }
+.rule-stat { font-size: .65rem; font-family: var(--mono); }
+
+/* QUEUE */
+.queue-wrap { overflow-x: auto; }
+.queue-table { width: 100%; border-collapse: collapse; font-size: .72rem; }
+.queue-table th { text-align: left; font-size: .6rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: .6rem 1rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.queue-table td { padding: .75rem 1rem; border-bottom: 1px solid rgba(175,169,236,.06); vertical-align: top; }
+.queue-table tr:hover td { background: rgba(124,92,252,.04); }
+.reason-badge { font-size: .58rem; padding: .15rem .5rem; border-radius: 100px; display: inline-block; font-weight: 500; white-space: nowrap; }
+
+/* SECTION LABELS */
+.s-label { font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; color: var(--pL); margin-bottom: .5rem; }
+.s-title { font-family: var(--display); font-size: 1.6rem; font-weight: 700; margin-bottom: .5rem; }
+.s-sub { font-size: .78rem; color: var(--muted); margin-bottom: 1.75rem; line-height: 1.6; }
+
+.stack-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.5rem; }
+.stack-pill { font-size: .65rem; padding: .25rem .75rem; border-radius: 100px; border: 1px solid var(--border-hi); color: var(--pL); background: rgba(124,92,252,.08); }
+
+@media(max-width:700px) {
+  .metric-row { grid-template-columns: 1fr 1fr; }
+  .ba-grid { grid-template-columns: 1fr; }
+  nav { padding: 1rem; }
+  .nav-tabs { gap: .1rem; }
+  .nav-tab { padding: .35rem .6rem; font-size: .65rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">MaLux <span>·</span> CRM Data Quality Engine</div>
+  <div class="nav-tabs">
+    <button class="nav-tab on" onclick="show('overview',this)">Overview</button>
+    <button class="nav-tab" onclick="show('records',this)">Records</button>
+    <button class="nav-tab" onclick="show('before',this)">Before / After</button>
+    <button class="nav-tab" onclick="show('framework',this)">Framework</button>
+    <button class="nav-tab" onclick="show('queue',this)">Queue</button>
+  </div>
+</nav>
+
+<!-- OVERVIEW -->
+<div class="panel on" id="overview">
+  <div class="s-label">Portfolio Project · MaLux Data Consulting</div>
+  <div class="s-title">Healthcare Registrant Data Quality</div>
+  <div class="s-sub">3-layer resolution framework applied to 42,847 registrant records. Raised data completeness from 61% to 94% and maturity score from 11 to 19 out of 25.</div>
+
+  <div class="metric-row">
+    <div class="metric">
+      <div class="metric-label">Raw records</div>
+      <div class="metric-val">42,847</div>
+      <div class="metric-delta">ingested from legacy CRM</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Auto-resolved</div>
+      <div class="metric-val" style="color:var(--mint)">38,291</div>
+      <div class="metric-delta" style="color:var(--mint)">89.4% · Layers 1 + 2</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Rule-resolved</div>
+      <div class="metric-val" style="color:var(--purple)">3,847</div>
+      <div class="metric-delta" style="color:var(--pL)">8.9% · Layer 2</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Manual queue</div>
+      <div class="metric-val" style="color:var(--amber)">709</div>
+      <div class="metric-delta" style="color:var(--amber)">1.7% · Layer 3</div>
+    </div>
+  </div>
+
+  <div class="funnel">
+    <div class="f-step">
+      <div class="f-bar-wrap">
+        <div class="f-bar" style="background:rgba(124,92,252,.18);border:1px solid rgba(124,92,252,.3);width:100%">
+          <div><div class="f-name" style="color:var(--pL)">Raw CRM extract</div><div class="f-sub" style="color:var(--pL)">Legacy SQL Server · exported May 2025</div></div>
+          <div><div class="f-count" style="color:var(--pL)">42,847</div><div class="f-pct" style="color:var(--pL)">100%</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="f-connector"></div>
+    <div class="f-step">
+      <div class="f-bar-wrap">
+        <div class="f-bar" style="background:rgba(29,158,117,.12);border:1px solid rgba(29,158,117,.3);width:94%">
+          <div><div class="f-name" style="color:var(--mint)">Layer 1 — exact match</div><div class="f-sub" style="color:var(--mint)">PIN + surname + DOB · deterministic</div></div>
+          <div><div class="f-count" style="color:var(--mint)">31,204</div><div class="f-pct" style="color:var(--mint)">72.8%</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="f-connector"></div>
+    <div class="f-step">
+      <div class="f-bar-wrap">
+        <div class="f-bar" style="background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.2);width:80%">
+          <div><div class="f-name" style="color:var(--mint)">Layer 2 — status logic + fuzzy</div><div class="f-sub" style="color:var(--mint)">Application sequence · Levenshtein ≥ 0.88</div></div>
+          <div><div class="f-count" style="color:var(--mint)">10,934</div><div class="f-pct" style="color:var(--mint)">25.5%</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="f-connector"></div>
+    <div class="f-step">
+      <div class="f-bar-wrap">
+        <div class="f-bar" style="background:rgba(239,159,39,.1);border:1px solid rgba(239,159,39,.3);width:22%">
+          <div><div class="f-name" style="color:var(--amber)">Layer 3 — manual review</div><div class="f-sub" style="color:var(--amber)">Conflicting signals · analyst decision</div></div>
+          <div><div class="f-count" style="color:var(--amber)">709</div><div class="f-pct" style="color:var(--amber)">1.7%</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack-row">
+    <span class="stack-pill">Python</span><span class="stack-pill">Pandas</span><span class="stack-pill">Levenshtein</span>
+    <span class="stack-pill">PostgreSQL</span><span class="stack-pill">Apache Airflow</span><span class="stack-pill">Power BI</span><span class="stack-pill">SQL</span>
+  </div>
+</div>
+
+<!-- RECORDS -->
+<div class="panel" id="records">
+  <div class="s-label">Sample records</div>
+  <div class="s-title">Resolution outcomes</div>
+  <div class="s-sub">Representative sample across all resolution layers. Names and identifiers are anonymised.</div>
+  <div class="rec-filter">
+    <button class="rec-btn on" onclick="filterRec('all',this)">All</button>
+    <button class="rec-btn" onclick="filterRec('auto',this)">Auto-resolved</button>
+    <button class="rec-btn" onclick="filterRec('rule',this)">Rule-resolved</button>
+    <button class="rec-btn" onclick="filterRec('manual',this)">Manual queue</button>
+    <button class="rec-btn" onclick="filterRec('dup',this)">Duplicate</button>
+  </div>
+  <div class="rec-grid" id="recGrid"></div>
+</div>
+
+<!-- BEFORE / AFTER -->
+<div class="panel" id="before">
+  <div class="s-label">Quality delta</div>
+  <div class="s-title">Before & after remediation</div>
+  <div class="s-sub">Data maturity score advanced from 11/25 (Aware) to 19/25 (Managed) over the 8-week engagement.</div>
+  <div class="ba-grid">
+    <div class="ba-card">
+      <div class="ba-title">Before remediation</div>
+      <div class="score-row"><span class="score-label">Overall completeness</span><div class="score-track"><div class="score-fill" style="width:61%;background:var(--red)"></div></div><span class="score-val" style="color:var(--red)">61%</span></div>
+      <div class="score-row"><span class="score-label">Unique PIN match</span><div class="score-track"><div class="score-fill" style="width:54%;background:var(--red)"></div></div><span class="score-val" style="color:var(--red)">54%</span></div>
+      <div class="score-row"><span class="score-label">DOB accuracy</span><div class="score-track"><div class="score-fill" style="width:78%;background:var(--amber)"></div></div><span class="score-val" style="color:var(--amber)">78%</span></div>
+      <div class="score-row"><span class="score-label">Name standardisation</span><div class="score-track"><div class="score-fill" style="width:43%;background:var(--red)"></div></div><span class="score-val" style="color:var(--red)">43%</span></div>
+      <div class="score-row"><span class="score-label">Address fill rate</span><div class="score-track"><div class="score-fill" style="width:67%;background:var(--amber)"></div></div><span class="score-val" style="color:var(--amber)">67%</span></div>
+      <div class="score-row"><span class="score-label">Status consistency</span><div class="score-track"><div class="score-fill" style="width:52%;background:var(--red)"></div></div><span class="score-val" style="color:var(--red)">52%</span></div>
+      <div class="maturity-block">
+        <div class="ba-title">Data maturity score</div>
+        <div class="maturity-score" style="color:var(--red)">11 / 25</div>
+        <div class="maturity-label">Level: Aware</div>
+      </div>
+    </div>
+    <div class="ba-card">
+      <div class="ba-title">After remediation</div>
+      <div class="score-row"><span class="score-label">Overall completeness</span><div class="score-track"><div class="score-fill" style="width:94%;background:var(--mint)"></div></div><span class="score-val" style="color:var(--mint)">94%</span><span class="delta d-up">+33pp</span></div>
+      <div class="score-row"><span class="score-label">Unique PIN match</span><div class="score-track"><div class="score-fill" style="width:97%;background:var(--mint)"></div></div><span class="score-val" style="color:var(--mint)">97%</span><span class="delta d-up">+43pp</span></div>
+      <div class="score-row"><span class="score-label">DOB accuracy</span><div class="score-track"><div class="score-fill" style="width:96%;background:var(--mint)"></div></div><span class="score-val" style="color:var(--mint)">96%</span><span class="delta d-up">+18pp</span></div>
+      <div class="score-row"><span class="score-label">Name standardisation</span><div class="score-track"><div class="score-fill" style="width:98%;background:var(--mint)"></div></div><span class="score-val" style="color:var(--mint)">98%</span><span class="delta d-up">+55pp</span></div>
+      <div class="score-row"><span class="score-label">Address fill rate</span><div class="score-track"><div class="score-fill" style="width:89%;background:var(--mint)"></div></div><span class="score-val" style="color:var(--mint)">89%</span><span class="delta d-up">+22pp</span></div>
+      <div class="score-row"><span class="score-label">Status consistency</span><div class="score-track"><div class="score-fill" style="width:95%;background:var(--mint)"></div></div><span class="score-val" style="color:var(--mint)">95%</span><span class="delta d-up">+43pp</span></div>
+      <div class="maturity-block">
+        <div class="ba-title">Data maturity score</div>
+        <div class="maturity-score" style="color:var(--mint)">19 / 25</div>
+        <div class="maturity-label">Level: Managed → target: Optimising</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FRAMEWORK -->
+<div class="panel" id="framework">
+  <div class="s-label">Resolution methodology</div>
+  <div class="s-title">3-layer framework</div>
+  <div class="s-sub">Each layer handles progressively more complex matching scenarios. Only records that fail all layers enter the manual queue.</div>
+  <div class="rule-list">
+    <div class="rule-item">
+      <span class="rule-num" style="background:rgba(29,158,117,.15);color:var(--mint);border:1px solid rgba(29,158,117,.3)">Layer 1</span>
+      <div>
+        <div class="rule-title">Exact deterministic match</div>
+        <div class="rule-desc">Match on PIN + normalised surname + date of birth. All three must agree exactly. Any mismatch drops to Layer 2. Handles clean records from recent cohorts where data capture was systematic.</div>
+        <div class="rule-stat" style="color:var(--mint)">31,204 resolved · 72.8% · avg confidence 1.00</div>
+      </div>
+    </div>
+    <div class="rule-item">
+      <span class="rule-num" style="background:rgba(124,92,252,.15);color:var(--pL);border:1px solid rgba(124,92,252,.3)">Layer 2a</span>
+      <div>
+        <div class="rule-title">Application status sequence logic</div>
+        <div class="rule-desc">Where PIN is missing or malformed, match on application date range + expected status progression (Applied → Assessed → Registered). Catches pre-2019 records where PINs were not systematically captured.</div>
+        <div class="rule-stat" style="color:var(--pL)">6,847 resolved · avg confidence 0.91</div>
+      </div>
+    </div>
+    <div class="rule-item">
+      <span class="rule-num" style="background:rgba(124,92,252,.15);color:var(--pL);border:1px solid rgba(124,92,252,.3)">Layer 2b</span>
+      <div>
+        <div class="rule-title">Fuzzy name + DOB matching</div>
+        <div class="rule-desc">Levenshtein distance on surname (threshold ≥ 0.88) combined with DOB within a 365-day window. Both conditions must hold simultaneously. Catches hyphenated surname changes, Irish language variants (Ó/O'), and common encoding errors.</div>
+        <div class="rule-stat" style="color:var(--pL)">4,087 resolved · avg confidence 0.89</div>
+      </div>
+    </div>
+    <div class="rule-item">
+      <span class="rule-num" style="background:rgba(239,159,39,.1);color:var(--amber);border:1px solid rgba(239,159,39,.3)">Layer 3</span>
+      <div>
+        <div class="rule-title">Structured manual review queue</div>
+        <div class="rule-desc">Records where Layers 1 and 2 produce conflicting signals or confidence falls below 0.75. Exported to a structured review template with pre-populated candidate matches and conflict reasons. Analyst makes the final determination with documented rationale.</div>
+        <div class="rule-stat" style="color:var(--amber)">709 flagged · avg 4.2 min per record · ~50 analyst hours total</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUEUE -->
+<div class="panel" id="queue">
+  <div class="s-label">Manual review queue</div>
+  <div class="s-title">Flagged records</div>
+  <div class="s-sub">709 records awaiting analyst decision. Sorted by confidence ascending. Showing representative sample of 8.</div>
+  <div class="queue-wrap">
+    <table class="queue-table">
+      <thead>
+        <tr>
+          <th>Record ID</th>
+          <th>Name (raw)</th>
+          <th>Candidate matches</th>
+          <th>Conflict reason</th>
+          <th>Confidence</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody id="queueBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const records = [
+  {id:'REG-00441',name:"Mary O'Brien",dob:'1978-03-14',pin:'PIN-441882',status:'Registered',address:'14 Oak St, Dublin',type:'auto',conf:0.99,note:'Exact PIN + DOB + name match'},
+  {id:'REG-01204',name:'Siobhán Murphy',dob:'1985-11-02',pin:'PIN-120477',status:'Active',address:'7 Elm Ave, Cork',type:'auto',conf:0.98,note:'Exact match'},
+  {id:'REG-02871',name:'Patrick J. Walsh',dob:'1971-07-19',pin:'PIN-287134',status:'Registered',address:'22 Main St, Galway',type:'auto',conf:0.97,note:'Exact match · middle initial stripped on normalisation'},
+  {id:'REG-05512',name:'Aoife Ní Bhriain',dob:'1990-04-28',pin:'',status:'Applied',address:'3 River Rd, Limerick',type:'rule',conf:0.91,note:'PIN missing · matched via status sequence + DOB window'},
+  {id:'REG-08834',name:"Brigid O'Callaghan",dob:'1962-12-05',pin:'PIN-883401',status:'Lapsed',address:'',type:'rule',conf:0.89,note:'Fuzzy name score 0.91 · address field empty'},
+  {id:'REG-11029',name:'Caoimhe Ní Mhurchú',dob:'1994-08-17',pin:'',status:'Assessed',address:'47 Ash Ln, Waterford',type:'rule',conf:0.87,note:'No PIN · Layer 2b name + DOB match'},
+  {id:'REG-14401',name:'John P. Reilly',dob:'1955-01-30',pin:'PIN-144012',status:'Suspended',address:'9 Church St, Kilkenny',type:'manual',conf:0.71,note:'Two candidates share PIN · DOB differs by 11 years'},
+  {id:'REG-18892',name:'Fionnuala Brennan',dob:'1988-06-22',pin:'',status:'Registered',address:'',type:'manual',conf:0.68,note:'No PIN, no address · name-only match below threshold'},
+  {id:'REG-22003',name:"Seán Ó'Donoghue",dob:'1976-09-11',pin:'PIN-220031',status:'Active',address:'31 Bridge Rd, Sligo',type:'dup',conf:0,note:'Exact duplicate of REG-21998 · different source system import'},
+  {id:'REG-29441',name:'Margaret T. Flynn',dob:'1943-02-28',pin:'',status:'Lapsed',address:'5 Hill View, Ennis',type:'manual',conf:0.64,note:'Pre-2010 record · no PIN era · 3 candidates in date range'},
+];
+
+const badgeClass = {auto:'badge-ok',rule:'badge-p',manual:'badge-warn',dup:'badge-err'};
+const badgeLabel = {auto:'Auto-resolved',rule:'Rule-resolved',manual:'Manual queue',dup:'Duplicate'};
+const confColor = c => c >= 0.9 ? 'var(--mint)' : c >= 0.75 ? 'var(--amber)' : c > 0 ? 'var(--red)' : 'var(--muted)';
+let currentFilter = 'all';
+
+function filterRec(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.rec-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderRecs();
+}
+
+function renderRecs() {
+  const data = currentFilter === 'all' ? records : records.filter(r => r.type === currentFilter);
+  document.getElementById('recGrid').innerHTML = data.map(r => `
+    <div class="rec-card">
+      <div class="rec-header">
+        <div><div class="rec-name">${r.name}</div><div class="rec-id">${r.id}</div></div>
+        <span class="badge ${badgeClass[r.type]}">${badgeLabel[r.type]}</span>
+      </div>
+      <div class="rec-row"><span class="rec-key">DOB</span><span class="rec-val">${r.dob}</span></div>
+      <div class="rec-row"><span class="rec-key">PIN</span><span class="rec-val">${r.pin || '— missing'}</span></div>
+      <div class="rec-row"><span class="rec-key">Status</span><span class="rec-val">${r.status}</span></div>
+      <div class="rec-row"><span class="rec-key">Address</span><span class="rec-val">${r.address || '— missing'}</span></div>
+      <div class="rec-row"><span class="rec-key">Confidence</span><span class="rec-val" style="color:${confColor(r.conf)}">${r.conf > 0 ? Math.round(r.conf*100)+'%' : 'n/a'}</span></div>
+      <div class="rec-note">${r.note}</div>
+    </div>
+  `).join('');
+}
+
+const queueData = [
+  {id:'REG-14401',name:"John P. Reilly",candidate:"John Reilly (REG-14399)",reason:'DOB conflict',reasonClass:'badge-err',conf:'71%',pri:'High',priColor:'var(--red)'},
+  {id:'REG-18892',name:"Fionnuala Brennan",candidate:"F. Brennan (REG-18801), F.M. Brennan (REG-18834)",reason:'Name variant',reasonClass:'badge-p',conf:'68%',pri:'High',priColor:'var(--red)'},
+  {id:'REG-29441',name:"Margaret T. Flynn",candidate:"M. Flynn (3 candidates in date range)",reason:'Duplicate risk',reasonClass:'badge-err',conf:'64%',pri:'Medium',priColor:'var(--amber)'},
+  {id:'REG-31002',name:"Áine Ní Fhaoláin",candidate:"Aine Ni Fhaolain (REG-31001)",reason:'Name variant',reasonClass:'badge-p',conf:'73%',pri:'Medium',priColor:'var(--amber)'},
+  {id:'REG-33441',name:"Eamonn Ó'Sullivan",candidate:"Eamonn O'Sullivan (REG-33440)",reason:'Encoding variant',reasonClass:'badge-p',conf:'74%',pri:'Low',priColor:'var(--mint)'},
+  {id:'REG-38812',name:"Patricia Mc Namara",candidate:"Patricia McNamara (REG-38809)",reason:'Name variant',reasonClass:'badge-p',conf:'76%',pri:'Low',priColor:'var(--mint)'},
+  {id:'REG-41002',name:"Catherine Doyle",candidate:"C. Doyle (REG-41000), Catherine M. Doyle (REG-41003)",reason:'DOB conflict',reasonClass:'badge-err',conf:'69%',pri:'Medium',priColor:'var(--amber)'},
+  {id:'REG-42109',name:"Séamas Ó'Briain",candidate:"James O'Brien (REG-42108)",reason:'Name variant',reasonClass:'badge-p',conf:'62%',pri:'High',priColor:'var(--red)'},
+];
+
+document.getElementById('queueBody').innerHTML = queueData.map(r => `
+  <tr>
+    <td style="font-family:var(--mono);font-size:.65rem;color:var(--muted)">${r.id}</td>
+    <td style="font-weight:500">${r.name}</td>
+    <td style="color:var(--muted);font-size:.68rem">${r.candidate}</td>
+    <td><span class="reason-badge ${r.reasonClass}">${r.reason}</span></td>
+    <td style="color:${r.conf < '70%' ? 'var(--red)' : 'var(--amber)'};font-weight:500">${r.conf}</td>
+    <td style="color:${r.priColor};font-size:.68rem;font-weight:500">${r.pri}</td>
+  </tr>
+`).join('');
+
+function show(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+}
+
+renderRecs();
+</script>
+</body>
+</html>
