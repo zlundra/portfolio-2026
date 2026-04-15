@@ -1,0 +1,69 @@
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" width="800" height="400">
+  <defs>
+    <linearGradient id="bg5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0e0c1a"/>
+      <stop offset="100%" style="stop-color:#1e1a38"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#bg5)"/>
+  <!-- Grid -->
+  <line x1="80" y1="40" x2="80" y2="310" stroke="#afa9ec" stroke-width="0.4" opacity="0.15"/>
+  <line x1="80" y1="310" x2="500" y2="310" stroke="#afa9ec" stroke-width="0.4" opacity="0.15"/>
+  <line x1="80" y1="40" x2="500" y2="40" stroke="#afa9ec" stroke-width="0.3" opacity="0.08"/>
+  <line x1="80" y1="107" x2="500" y2="107" stroke="#afa9ec" stroke-width="0.3" opacity="0.08"/>
+  <line x1="80" y1="175" x2="500" y2="175" stroke="#afa9ec" stroke-width="0.3" opacity="0.08"/>
+  <line x1="80" y1="242" x2="500" y2="242" stroke="#afa9ec" stroke-width="0.3" opacity="0.08"/>
+  <!-- Axis labels -->
+  <text x="70" y="44" font-family="monospace" font-size="9" fill="#6a6a8a" text-anchor="end">1.0</text>
+  <text x="70" y="111" font-family="monospace" font-size="9" fill="#6a6a8a" text-anchor="end">0.75</text>
+  <text x="70" y="178" font-family="monospace" font-size="9" fill="#6a6a8a" text-anchor="end">0.5</text>
+  <text x="70" y="245" font-family="monospace" font-size="9" fill="#6a6a8a" text-anchor="end">0.25</text>
+  <text x="70" y="313" font-family="monospace" font-size="9" fill="#6a6a8a" text-anchor="end">0.0</text>
+  <!-- ROC curve -->
+  <polyline points="80,310 100,272 120,244 145,220 170,200 200,183 235,168 275,155 315,144 360,135 405,127 450,120 490,115" fill="none" stroke="#7c5cfc" stroke-width="2.5" stroke-linejoin="round"/>
+  <polygon points="80,310 100,272 120,244 145,220 170,200 200,183 235,168 275,155 315,144 360,135 405,127 450,120 490,115 490,310" fill="rgba(124,92,252,0.08)"/>
+  <!-- Baseline diagonal -->
+  <line x1="80" y1="310" x2="490" y2="40" stroke="rgba(175,169,236,0.25)" stroke-width="1" stroke-dasharray="5,4"/>
+  <!-- AUC label -->
+  <rect x="200" y="230" width="100" height="28" rx="6" fill="rgba(124,92,252,0.15)" stroke="rgba(124,92,252,0.4)" stroke-width="1"/>
+  <text x="250" y="248" font-family="monospace" font-size="12" fill="#afa9ec" text-anchor="middle" font-weight="700">AUC = 0.84</text>
+  <!-- Axis titles -->
+  <text x="290" y="335" font-family="monospace" font-size="10" fill="#6a6a8a" text-anchor="middle">False positive rate</text>
+  <text x="32" y="175" font-family="monospace" font-size="10" fill="#6a6a8a" text-anchor="middle" transform="rotate(-90 32 175)">True positive rate</text>
+  <!-- Feature importance bars right side -->
+  <text x="540" y="55" font-family="monospace" font-size="10" fill="#6a6a8a" letter-spacing="1">FEATURE IMPORTANCE</text>
+  <text x="540" y="80" font-family="monospace" font-size="10" fill="#6a6a8a">Age</text>
+  <rect x="620" y="68" width="140" height="10" rx="3" fill="rgba(226,75,74,0.7)"/>
+  <text x="765" y="80" font-family="monospace" font-size="9" fill="#e24b4a" text-anchor="end">0.91</text>
+  <text x="540" y="103" font-family="monospace" font-size="10" fill="#6a6a8a">Hypertension</text>
+  <rect x="620" y="91" width="120" height="10" rx="3" fill="rgba(226,75,74,0.6)"/>
+  <text x="765" y="103" font-family="monospace" font-size="9" fill="#e24b4a" text-anchor="end">0.78</text>
+  <text x="540" y="126" font-family="monospace" font-size="10" fill="#6a6a8a">Avg glucose</text>
+  <rect x="620" y="114" width="110" height="10" rx="3" fill="rgba(239,159,39,0.6)"/>
+  <text x="765" y="126" font-family="monospace" font-size="9" fill="#ef9f27" text-anchor="end">0.72</text>
+  <text x="540" y="149" font-family="monospace" font-size="10" fill="#6a6a8a">Heart disease</text>
+  <rect x="620" y="137" width="100" height="10" rx="3" fill="rgba(239,159,39,0.5)"/>
+  <text x="765" y="149" font-family="monospace" font-size="9" fill="#ef9f27" text-anchor="end">0.65</text>
+  <text x="540" y="172" font-family="monospace" font-size="10" fill="#6a6a8a">BMI</text>
+  <rect x="620" y="160" width="75" height="10" rx="3" fill="rgba(175,169,236,0.4)"/>
+  <text x="765" y="172" font-family="monospace" font-size="9" fill="#afa9ec" text-anchor="end">0.48</text>
+  <text x="540" y="195" font-family="monospace" font-size="10" fill="#6a6a8a">Smoking</text>
+  <rect x="620" y="183" width="64" height="10" rx="3" fill="rgba(175,169,236,0.3)"/>
+  <text x="765" y="195" font-family="monospace" font-size="9" fill="#afa9ec" text-anchor="end">0.41</text>
+  <!-- Confusion matrix mini -->
+  <text x="540" y="230" font-family="monospace" font-size="10" fill="#6a6a8a" letter-spacing="1">CONFUSION MATRIX</text>
+  <rect x="540" y="240" width="95" height="55" rx="4" fill="rgba(29,158,117,0.12)" stroke="rgba(29,158,117,0.3)" stroke-width="0.8"/>
+  <text x="587" y="262" font-family="monospace" font-size="9" fill="#6a6a8a" text-anchor="middle">TN</text>
+  <text x="587" y="280" font-family="monospace" font-size="16" fill="#1d9e75" text-anchor="middle" font-weight="700">891</text>
+  <rect x="645" y="240" width="95" height="55" rx="4" fill="rgba(239,159,39,0.08)" stroke="rgba(239,159,39,0.3)" stroke-width="0.8"/>
+  <text x="692" y="262" font-family="monospace" font-size="9" fill="#6a6a8a" text-anchor="middle">FP</text>
+  <text x="692" y="280" font-family="monospace" font-size="16" fill="#ef9f27" text-anchor="middle" font-weight="700">83</text>
+  <rect x="540" y="303" width="95" height="55" rx="4" fill="rgba(239,159,39,0.08)" stroke="rgba(239,159,39,0.3)" stroke-width="0.8"/>
+  <text x="587" y="325" font-family="monospace" font-size="9" fill="#6a6a8a" text-anchor="middle">FN</text>
+  <text x="587" y="343" font-family="monospace" font-size="16" fill="#ef9f27" text-anchor="middle" font-weight="700">9</text>
+  <rect x="645" y="303" width="95" height="55" rx="4" fill="rgba(29,158,117,0.12)" stroke="rgba(29,158,117,0.3)" stroke-width="0.8"/>
+  <text x="692" y="325" font-family="monospace" font-size="9" fill="#6a6a8a" text-anchor="middle">TP</text>
+  <text x="692" y="343" font-family="monospace" font-size="16" fill="#1d9e75" text-anchor="middle" font-weight="700">39</text>
+  <!-- Title -->
+  <text x="40" y="378" font-family="monospace" font-size="11" fill="#6a6a8a" letter-spacing="2">CLINICAL OUTCOMES PREDICTOR</text>
+</svg>

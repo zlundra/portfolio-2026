@@ -1,0 +1,75 @@
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" width="800" height="400">
+  <defs>
+    <linearGradient id="bg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0e0c1a"/>
+      <stop offset="100%" style="stop-color:#1e1a38"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#bg4)"/>
+  <!-- Phase steps horizontal -->
+  <rect x="30" y="80" width="108" height="60" rx="8" fill="rgba(124,92,252,0.15)" stroke="rgba(124,92,252,0.4)" stroke-width="1"/>
+  <text x="84" y="106" font-family="monospace" font-size="9" fill="#afa9ec" text-anchor="middle" letter-spacing="1">PHASE 1</text>
+  <text x="84" y="122" font-family="monospace" font-size="10" fill="#eeedfe" text-anchor="middle" font-weight="600">Pre-migration</text>
+  <line x1="138" y1="110" x2="158" y2="110" stroke="#afa9ec" stroke-width="1" opacity="0.4"/>
+  <polygon points="158,106 168,110 158,114" fill="#afa9ec" opacity="0.4"/>
+
+  <rect x="168" y="80" width="108" height="60" rx="8" fill="rgba(239,159,39,0.1)" stroke="rgba(239,159,39,0.35)" stroke-width="1"/>
+  <text x="222" y="106" font-family="monospace" font-size="9" fill="#ef9f27" text-anchor="middle" letter-spacing="1">PHASE 2</text>
+  <text x="222" y="122" font-family="monospace" font-size="10" fill="#eeedfe" text-anchor="middle" font-weight="600">Baseline</text>
+  <line x1="276" y1="110" x2="296" y2="110" stroke="#afa9ec" stroke-width="1" opacity="0.4"/>
+  <polygon points="296,106 306,110 296,114" fill="#afa9ec" opacity="0.4"/>
+
+  <rect x="306" y="80" width="108" height="60" rx="8" fill="rgba(130,170,255,0.08)" stroke="rgba(130,170,255,0.3)" stroke-width="1"/>
+  <text x="360" y="106" font-family="monospace" font-size="9" fill="#82aaff" text-anchor="middle" letter-spacing="1">PHASE 3</text>
+  <text x="360" y="122" font-family="monospace" font-size="10" fill="#eeedfe" text-anchor="middle" font-weight="600">Mapping</text>
+  <line x1="414" y1="110" x2="434" y2="110" stroke="#afa9ec" stroke-width="1" opacity="0.4"/>
+  <polygon points="434,106 444,110 434,114" fill="#afa9ec" opacity="0.4"/>
+
+  <rect x="444" y="80" width="108" height="60" rx="8" fill="rgba(29,158,117,0.12)" stroke="rgba(29,158,117,0.35)" stroke-width="1"/>
+  <text x="498" y="106" font-family="monospace" font-size="9" fill="#1d9e75" text-anchor="middle" letter-spacing="1">PHASE 4</text>
+  <text x="498" y="122" font-family="monospace" font-size="10" fill="#eeedfe" text-anchor="middle" font-weight="600">Validation</text>
+  <line x1="552" y1="110" x2="572" y2="110" stroke="#afa9ec" stroke-width="1" opacity="0.4"/>
+  <polygon points="572,106 582,110 572,114" fill="#afa9ec" opacity="0.4"/>
+
+  <rect x="582" y="80" width="108" height="60" rx="8" fill="rgba(175,169,236,0.1)" stroke="rgba(175,169,236,0.35)" stroke-width="1"/>
+  <text x="636" y="106" font-family="monospace" font-size="9" fill="#afa9ec" text-anchor="middle" letter-spacing="1">PHASE 5</text>
+  <text x="636" y="122" font-family="monospace" font-size="10" fill="#eeedfe" text-anchor="middle" font-weight="600">Sign-off</text>
+  <line x1="690" y1="110" x2="710" y2="110" stroke="#afa9ec" stroke-width="1" opacity="0.4"/>
+  <polygon points="710,106 720,110 710,114" fill="#afa9ec" opacity="0.4"/>
+
+  <rect x="720" y="80" width="50" height="60" rx="8" fill="rgba(29,158,117,0.12)" stroke="rgba(29,158,117,0.35)" stroke-width="1"/>
+  <text x="745" y="106" font-family="monospace" font-size="8" fill="#1d9e75" text-anchor="middle">PHASE</text>
+  <text x="745" y="120" font-family="monospace" font-size="8" fill="#1d9e75" text-anchor="middle">6</text>
+  <text x="745" y="133" font-family="monospace" font-size="7" fill="#1d9e75" text-anchor="middle">Monitor</text>
+
+  <!-- Progress bar -->
+  <rect x="30" y="170" width="740" height="8" rx="4" fill="rgba(255,255,255,0.06)"/>
+  <rect x="30" y="170" width="550" height="8" rx="4" fill="#1d9e75" opacity="0.7"/>
+  <text x="30" y="196" font-family="monospace" font-size="10" fill="#6a6a8a">Checklist progress</text>
+  <text x="770" y="196" font-family="monospace" font-size="10" fill="#1d9e75" text-anchor="end">31 / 42 complete</text>
+
+  <!-- Gate cards -->
+  <rect x="30" y="215" width="226" height="110" rx="8" fill="rgba(226,75,74,0.06)" stroke="rgba(226,75,74,0.3)" stroke-width="1"/>
+  <text x="50" y="238" font-family="monospace" font-size="9" fill="#e24b4a" letter-spacing="1">GATE 1 · BLOCK</text>
+  <text x="50" y="255" font-family="monospace" font-size="11" fill="#eeedfe" font-weight="600">Zero critical failures</text>
+  <text x="50" y="272" font-family="monospace" font-size="10" fill="#6a6a8a">Row delta = 0</text>
+  <text x="50" y="288" font-family="monospace" font-size="10" fill="#6a6a8a">Zero orphaned records</text>
+  <text x="50" y="304" font-family="monospace" font-size="10" fill="#6a6a8a">Root cause evidenced</text>
+
+  <rect x="287" y="215" width="226" height="110" rx="8" fill="rgba(239,159,39,0.06)" stroke="rgba(239,159,39,0.3)" stroke-width="1"/>
+  <text x="307" y="238" font-family="monospace" font-size="9" fill="#ef9f27" letter-spacing="1">GATE 2 · REVIEW</text>
+  <text x="307" y="255" font-family="monospace" font-size="11" fill="#eeedfe" font-weight="600">All warnings reviewed</text>
+  <text x="307" y="272" font-family="monospace" font-size="10" fill="#6a6a8a">Written acceptance per WARN</text>
+  <text x="307" y="288" font-family="monospace" font-size="10" fill="#6a6a8a">Remediation tasks logged</text>
+  <text x="307" y="304" font-family="monospace" font-size="10" fill="#6a6a8a">Timeline agreed</text>
+
+  <rect x="544" y="215" width="226" height="110" rx="8" fill="rgba(29,158,117,0.06)" stroke="rgba(29,158,117,0.3)" stroke-width="1"/>
+  <text x="564" y="238" font-family="monospace" font-size="9" fill="#1d9e75" letter-spacing="1">GATE 3 · PASS</text>
+  <text x="564" y="255" font-family="monospace" font-size="11" fill="#eeedfe" font-weight="600">Sign-off document</text>
+  <text x="564" y="272" font-family="monospace" font-size="10" fill="#6a6a8a">Evidence pack attached</text>
+  <text x="564" y="288" font-family="monospace" font-size="10" fill="#6a6a8a">Sponsor signature</text>
+  <text x="564" y="304" font-family="monospace" font-size="10" fill="#6a6a8a">Go-live date recorded</text>
+
+  <!-- Title -->
+  <text x="40" y="378" font-family="monospace" font-size="11" fill="#6a6a8a" letter-spacing="2">DATA MIGRATION RECONCILIATION PLAYBOOK</text>
+</svg>
