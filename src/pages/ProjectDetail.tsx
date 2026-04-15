@@ -67,6 +67,76 @@ const projects: Record<string, Project> = {
     results: "AUC of 0.84 on held-out test data. Recall of 0.81 at threshold 0.3 — capturing 81% of true stroke cases. Feature importance analysis clearly identifies age, hypertension, and average glucose as the dominant risk factors, providing clinically actionable insight.",
   },
 
+
+  "migration-validation": {
+    title: "CRM Migration Validation Suite",
+    subtitle: "SQL Server → Salesforce · 47 automated checks",
+    description: "Post-migration validation suite between legacy SQL Server CRM and Salesforce. Row count reconciliation, referential integrity, field accuracy, null rate comparison, and structured sign-off report.",
+    image: "/images/health-project.jpeg",
+    tags: ["SQL Server", "Salesforce", "T-SQL", "Migration", "BA", "Data Validation"],
+    role: "BA Lead / Data Analyst",
+    timeline: "2-week validation sprint",
+    impact: [
+      "47 automated checks across 8 entity types — 82.9% pass rate on first run",
+      "2 blocking failures identified and resolved before go-live",
+      "16 missing registrant records traced to post-snapshot ETL gap and re-migrated",
+      "3 orphaned application records resolved — referential integrity restored",
+      "Formal sign-off report with evidence pack delivered to project sponsor",
+    ],
+    stack: ["T-SQL", "SQL Server", "Salesforce SOQL", "Excel", "Power BI"],
+    githubUrl: GITHUB_REPO,
+    demoUrl: "/demos/migration-validation.html",
+    challenge: "A CRM migration from legacy SQL Server to Salesforce had completed the ETL run but no formal validation had been performed. The project team needed structured evidence that the migration was accurate before decommissioning the source system.",
+    solution: "Designed and executed 47 automated validation checks across row counts, referential integrity, field-level accuracy, null rate comparison, and status value mapping. Results classified as PASS / WARN / FAIL with tolerance thresholds agreed upfront with the project sponsor.",
+    results: "2 blocking failures resolved before go-live. 6 warnings documented and accepted with a post-go-live remediation plan. Formal sign-off report produced and signed. Legacy system archived on schedule with zero post-go-live data incidents.",
+  },
+
+  "kpi-catalogue": {
+    title: "KPI Definition & Data Lineage Catalogue",
+    subtitle: "Healthcare body · 24 metrics · single source of truth",
+    description: "Structured KPI catalogue for a regulated healthcare organisation — 24 metrics with SQL logic, source lineage, owner, refresh cadence, and data quality flags. Built to resolve dashboard discrepancies.",
+    image: "/images/health-project.jpeg",
+    tags: ["BA", "KPI", "SQL", "Power BI", "Data Lineage", "Healthcare"],
+    role: "Data & Insights Officer / BA Lead",
+    timeline: "3-week discovery sprint",
+    impact: [
+      "24 KPIs defined with SQL logic, source lineage, and data quality flags",
+      "Resolved 4 dashboard discrepancies traced to inconsistent status filter logic",
+      "3 KPIs referencing null-prone fields — null handling standardised across all reports",
+      "Adopted by analytics and compliance teams as the single source of truth",
+      "Reduced ad-hoc 'why does my number differ' queries by an estimated 70%",
+    ],
+    stack: ["T-SQL", "SQL Server", "Power BI", "DAX", "Excel"],
+    githubUrl: GITHUB_REPO,
+    demoUrl: "/demos/kpi-catalogue.html",
+    challenge: "The analytics and compliance teams were producing conflicting numbers from the same source data. Reports disagreed on active registrant counts, processing times, and renewal rates — each team had slightly different filter logic that nobody had formally documented.",
+    solution: "Conducted a KPI discovery sprint — interviewed stakeholders, extracted source SQL from Power BI, and built a formal definition catalogue. Each KPI received a canonical definition, validated SQL query, data lineage, and documented data issues.",
+    results: "24 KPIs defined across 4 domains. 4 discrepancies resolved. 7 KPIs had data quality issues documented for the first time. The catalogue became the reference document for the Power BI development team.",
+  },
+
+  "migration-playbook": {
+    title: "Data Migration Reconciliation Playbook",
+    subtitle: "BA methodology · 6-phase process · SQL templates",
+    description: "A reusable BA-led methodology for validating a CRM data migration — pre-migration baseline through post-go-live monitoring, with SQL templates, sign-off gates, and interactive checklists.",
+    image: "/images/health-project.jpeg",
+    tags: ["BA", "Migration", "SQL", "T-SQL", "Process Design", "Sign-off"],
+    role: "BA Lead",
+    timeline: "Reusable deliverable",
+    impact: [
+      "6-phase methodology from pre-migration baseline through post-go-live monitoring",
+      "Reusable T-SQL templates for row count, field mapping, and referential integrity checks",
+      "3 formal sign-off gates prevent premature go-live approval",
+      "Applied on a healthcare CRM migration — zero post-go-live data incidents",
+      "Adopted as the standard process template for all subsequent system migrations",
+    ],
+    stack: ["T-SQL", "SQL Server", "SOQL", "Excel", "Process Documentation"],
+    githubUrl: GITHUB_REPO,
+    demoUrl: "/demos/migration-playbook.html",
+    challenge: "Data migrations are routinely signed off on 'it looked fine' rather than structured evidence — creating post-go-live data incidents and emergency remediation. The organisation needed a repeatable documented approach that any BA could follow.",
+    solution: "Built a 6-phase playbook: scope and sign-off criteria, source baseline capture, field mapping verification in staging, full automated check suite, formal sign-off gates with go/no-go criteria, and post-go-live daily monitoring. Each phase has reusable SQL templates and a checklist.",
+    results: "Applied on a healthcare CRM migration with zero post-go-live data incidents. The 3-gate sign-off framework was adopted as a standard requirement for all future migrations.",
+  },
+
   "retail-sales-dashboard": {
     title: "Retail Sales Dashboard",
     subtitle: "Dash v2+ Interactive Analytics App · Deployed",
@@ -225,3 +295,4 @@ export default function ProjectDetail() {
     </Layout>
   );
 }
+

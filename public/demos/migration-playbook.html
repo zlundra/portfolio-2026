@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Migration Reconciliation Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0c1a;--s1:#16132a;--s2:#1e1a38;--border:rgba(175,169,236,.12);--bhi:rgba(175,169,236,.3);--purple:#7c5cfc;--pL:#afa9ec;--mint:#1d9e75;--amber:#ef9f27;--red:#e24b4a;--text:#eeedfe;--muted:#6a6a8a;--mono:'DM Mono',monospace;--display:'Syne',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(14,12,26,.95);backdrop-filter:blur(12px);z-index:100;flex-wrap:wrap;gap:.75rem}
+.nav-logo{font-family:var(--display);font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.5rem}
+.nav-logo span{color:var(--pL)}
+.phase-nav{display:flex;gap:.25rem;flex-wrap:wrap}
+.pn{background:transparent;border:1px solid transparent;color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:.4rem .9rem;border-radius:.35rem;cursor:pointer;transition:all .2s}
+.pn:hover{color:var(--text);border-color:var(--bhi)}
+.pn.on{background:rgba(124,92,252,.15);border-color:rgba(124,92,252,.4);color:var(--pL)}
+.wrap{padding:2rem;max-width:1000px;margin:0 auto}
+.phase-panel{display:none;animation:fi .3s ease}
+.phase-panel.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.s-label{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pL);margin-bottom:.4rem}
+.s-title{font-family:var(--display);font-size:1.4rem;font-weight:700;margin-bottom:.4rem}
+.s-sub{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.6}
+.phase-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;border-radius:.5rem;font-size:.72rem;font-weight:600;margin-bottom:1.25rem;border:1px solid}
+.step-block{background:var(--s1);border:1px solid var(--border);border-radius:.75rem;padding:1.5rem;margin-bottom:1rem}
+.step-header{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1rem}
+.step-num{width:32px;height:32px;border-radius:.5rem;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;flex-shrink:0}
+.step-title{font-family:var(--display);font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.step-desc{font-size:.72rem;color:var(--muted);line-height:1.7}
+.step-footer{display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap;align-items:center}
+.owner-tag{font-size:.62rem;padding:.2rem .6rem;border-radius:.25rem;background:rgba(175,169,236,.08);border:1px solid var(--border);color:var(--muted)}
+.time-tag{font-size:.62rem;padding:.2rem .6rem;border-radius:.25rem;background:rgba(124,92,252,.08);border:1px solid rgba(124,92,252,.2);color:var(--pL)}
+.sql-block{background:var(--s2);border:1px solid var(--border);border-radius:.5rem;overflow:hidden;margin-top:1rem}
+.sql-bar{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+.sql-title-sm{font-size:.62rem;color:var(--muted)}
+.sql-badge{font-size:.58rem;padding:.12rem .5rem;border-radius:.25rem;background:rgba(124,92,252,.12);color:var(--pL)}
+pre{padding:1rem;font-size:.68rem;line-height:1.85;overflow-x:auto}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.cmt{color:#546e7a;font-style:italic}.num{color:#f78c6c}.op{color:var(--pL)}
+.checklist{margin-top:1rem}
+.check-item{display:flex;align-items:flex-start;gap:.75rem;padding:.6rem 0;border-top:1px solid rgba(175,169,236,.06);font-size:.72rem;cursor:pointer}
+.check-item:first-child{border-top:none}
+.check-box{width:16px;height:16px;border:1px solid var(--bhi);border-radius:.25rem;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:.05rem}
+.check-box.checked{background:var(--mint);border-color:var(--mint)}
+.check-label{color:var(--muted);line-height:1.5;flex:1}
+.check-label.checked{color:var(--text);text-decoration:line-through;opacity:.6}
+.progress-wrap{margin-bottom:1.5rem;background:var(--s1);border:1px solid var(--border);border-radius:.75rem;padding:1.25rem}
+.progress-title{font-size:.72rem;color:var(--muted);margin-bottom:.75rem;display:flex;justify-content:space-between}
+.progress-track{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;background:var(--mint);transition:width .4s ease}
+.gate-card{background:var(--s1);border:1px solid;border-radius:.75rem;padding:1.25rem;margin-bottom:.75rem}
+.gate-title{font-family:var(--display);font-size:.9rem;font-weight:600;margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem}
+.gate-desc{font-size:.7rem;color:var(--muted);line-height:1.65}
+.gate-criteria{margin-top:.75rem;font-size:.68rem}
+.gate-crit{padding:.3rem 0;border-top:1px solid rgba(175,169,236,.06);color:var(--muted)}
+.gate-crit::before{content:'→ ';color:var(--pL)}
+.badge{font-size:.58rem;padding:.15rem .5rem;border-radius:100px;font-weight:500;display:inline-block;white-space:nowrap}
+.badge-ok{background:rgba(29,158,117,.12);color:var(--mint);border:1px solid rgba(29,158,117,.3)}
+.badge-warn{background:rgba(239,159,39,.1);color:var(--amber);border:1px solid rgba(239,159,39,.3)}
+.badge-fail{background:rgba(226,75,74,.12);color:var(--red);border:1px solid rgba(226,75,74,.3)}
+.badge-p{background:rgba(124,92,252,.12);color:var(--pL);border:1px solid rgba(124,92,252,.3)}
+@media(max-width:640px){nav{padding:1rem}.phase-nav{gap:.1rem}.pn{padding:.3rem .5rem;font-size:.62rem}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">MaLux <span>·</span> Migration Playbook</div>
+  <div class="phase-nav">
+    <button class="pn on" onclick="showPhase('p1',this)">1 · Pre-migration</button>
+    <button class="pn" onclick="showPhase('p2',this)">2 · Baseline</button>
+    <button class="pn" onclick="showPhase('p3',this)">3 · Mapping</button>
+    <button class="pn" onclick="showPhase('p4',this)">4 · Validation</button>
+    <button class="pn" onclick="showPhase('p5',this)">5 · Sign-off</button>
+    <button class="pn" onclick="showPhase('p6',this)">6 · Post-go-live</button>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="s-label">Portfolio Project · MaLux Data Consulting</div>
+  <div class="s-title">Data Migration Reconciliation Playbook</div>
+  <div class="s-sub">BA-led methodology for validating a CRM data migration. Step-by-step process from pre-migration baseline through post-go-live monitoring — with SQL templates, sign-off gates, and a structured exception log. Click each phase to explore.</div>
+
+  <div class="progress-wrap">
+    <div class="progress-title"><span>Overall checklist progress</span><span id="progressLabel">0 / 0 complete</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressBar" style="width:0%"></div></div>
+  </div>
+
+<!-- PHASE 1 -->
+<div class="phase-panel on" id="p1">
+  <div class="phase-badge" style="background:rgba(124,92,252,.1);border-color:rgba(124,92,252,.3);color:var(--pL)">Phase 1 · Pre-Migration Preparation</div>
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(124,92,252,.15);color:var(--pL);border:1px solid rgba(124,92,252,.3)">1.1</div>
+      <div><div class="step-title">Define scope and entity list</div><div class="step-desc">List every entity (table/object) to be migrated. For each entity, define: primary key, business key, critical fields, status values, and known data issues. This becomes the validation matrix.</div></div>
+    </div>
+    <div class="checklist" data-phase="p1">
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Entity list signed off by project sponsor</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Primary key and business key confirmed per entity</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Critical fields list agreed (mandatory for field-level checks)</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Known data issues documented before migration begins</div></div>
+    </div>
+    <div class="step-footer"><div class="owner-tag">Owner: BA Lead</div><div class="time-tag">Duration: 1–2 days</div></div>
+  </div>
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(124,92,252,.15);color:var(--pL);border:1px solid rgba(124,92,252,.3)">1.2</div>
+      <div><div class="step-title">Agree sign-off criteria upfront</div><div class="step-desc">Define what "migration complete" means before anyone runs a single query. Agree acceptable tolerance thresholds (e.g. ≤0 row count delta for critical entities, ≤0.5% for non-critical) and who has authority to sign off.</div></div>
+    </div>
+    <div class="checklist" data-phase="p1">
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Tolerance thresholds agreed and documented per entity</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Sign-off authority confirmed (project sponsor + technical lead)</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Rollback trigger criteria defined (what would cause a migration halt)</div></div>
+    </div>
+    <div class="step-footer"><div class="owner-tag">Owner: PM + BA</div><div class="time-tag">Duration: Half day</div></div>
+  </div>
+</div>
+
+<!-- PHASE 2 -->
+<div class="phase-panel" id="p2">
+  <div class="phase-badge" style="background:rgba(239,159,39,.08);border-color:rgba(239,159,39,.3);color:var(--amber)">Phase 2 · Source Baseline Capture</div>
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(239,159,39,.1);color:var(--amber);border:1px solid rgba(239,159,39,.3)">2.1</div>
+      <div><div class="step-title">Capture source row counts and null rates</div><div class="step-desc">Run baseline queries against the source database before any migration job runs. Save results to a validation log table. These are your ground truth — every subsequent check compares to these numbers.</div></div>
+    </div>
+    <div class="sql-block">
+      <div class="sql-bar"><div class="sql-title-sm">baseline_counts.sql · Run against source before migration</div><div class="sql-badge">T-SQL</div></div>
+      <pre><span class="cmt">-- Capture baseline row counts per entity</span>
+<span class="kw">INSERT INTO</span> validation_log.dbo.baseline_counts
+    (entity_name, row_count, null_pin_count, null_dob_count, captured_at)
+<span class="kw">SELECT</span>
+    <span class="str">'tbl_Registrant'</span>,
+    <span class="fn">COUNT</span>(<span class="op">*</span>),
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> PINNumber <span class="kw">IS NULL THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>),
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> DateOfBirth <span class="kw">IS NULL THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>),
+    <span class="fn">GETDATE</span>()
+<span class="kw">FROM</span> CRM_PROD.dbo.tbl_Registrant
+<span class="kw">WHERE</span> IsDeleted <span class="op">=</span> <span class="num">0</span>;</pre>
+    </div>
+    <div class="checklist" data-phase="p2">
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Baseline row counts captured for all entities</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Null rates captured for all critical fields</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Baseline saved to validation_log with timestamp</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Source snapshot date/time recorded in migration log</div></div>
+    </div>
+    <div class="step-footer"><div class="owner-tag">Owner: BA / Data Engineer</div><div class="time-tag">Duration: 2–4 hours</div></div>
+  </div>
+</div>
+
+<!-- PHASE 3 -->
+<div class="phase-panel" id="p3">
+  <div class="phase-badge" style="background:rgba(130,170,255,.08);border-color:rgba(130,170,255,.3);color:#82aaff">Phase 3 · Field Mapping Verification</div>
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(130,170,255,.1);color:#82aaff;border:1px solid rgba(130,170,255,.3)">3.1</div>
+      <div><div class="step-title">Verify field mapping logic in staging</div><div class="step-desc">Before running against production, validate every field mapping in a staging environment. Common issues: data type truncation, encoding differences (UTF-8 vs ASCII), date format mismatches, status value translation tables.</div></div>
+    </div>
+    <div class="sql-block">
+      <div class="sql-bar"><div class="sql-title-sm">field_mapping_check.sql · Spot check 1,000 records</div><div class="sql-badge">T-SQL</div></div>
+      <pre><span class="cmt">-- Field mapping spot check: 1,000 random records</span>
+<span class="kw">SELECT TOP</span> <span class="num">1000</span>
+    src.RegistrantID,
+    src.Surname                   <span class="kw">AS</span> src_surname,
+    tgt.LastName                  <span class="kw">AS</span> tgt_surname,
+    <span class="fn">CASE</span> <span class="kw">WHEN</span> src.Surname <span class="op">=</span> tgt.LastName <span class="kw">THEN</span> <span class="str">'MATCH'</span> <span class="kw">ELSE</span> <span class="str">'MISMATCH'</span> <span class="kw">END</span> <span class="kw">AS</span> surname_check,
+    src.DateOfBirth               <span class="kw">AS</span> src_dob,
+    tgt.Birthdate                 <span class="kw">AS</span> tgt_dob,
+    <span class="fn">CASE</span> <span class="kw">WHEN</span> src.DateOfBirth <span class="op">=</span> tgt.Birthdate <span class="kw">THEN</span> <span class="str">'MATCH'</span> <span class="kw">ELSE</span> <span class="str">'MISMATCH'</span> <span class="kw">END</span> <span class="kw">AS</span> dob_check,
+    src.RegistrationStatus        <span class="kw">AS</span> src_status,
+    tgt.Registration_Status__c    <span class="kw">AS</span> tgt_status
+<span class="kw">FROM</span> CRM_PROD.dbo.tbl_Registrant src
+<span class="kw">JOIN</span> Staging_SF.dbo.Contact tgt
+    <span class="kw">ON</span> src.RegistrantID <span class="op">=</span> tgt.Legacy_ID__c
+<span class="kw">ORDER BY</span> <span class="fn">NEWID</span>(); <span class="cmt">-- random sample</span></pre>
+    </div>
+    <div class="checklist" data-phase="p3">
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Spot check (1,000 records) run in staging — mismatch rate &lt; 0.5%</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Status mapping table verified — all source values have a target mapping</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Date format alignment confirmed (ISO 8601 or locale-specific)</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Special characters tested (Irish fada: Ó, Á, É, Í, Ú)</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">ETL mapping config version-controlled and peer-reviewed</div></div>
+    </div>
+    <div class="step-footer"><div class="owner-tag">Owner: BA + ETL Engineer</div><div class="time-tag">Duration: 1 day</div></div>
+  </div>
+</div>
+
+<!-- PHASE 4 -->
+<div class="phase-panel" id="p4">
+  <div class="phase-badge" style="background:rgba(29,158,117,.08);border-color:rgba(29,158,117,.3);color:var(--mint)">Phase 4 · Post-Migration Validation</div>
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(29,158,117,.1);color:var(--mint);border:1px solid rgba(29,158,117,.3)">4.1</div>
+      <div><div class="step-title">Run full automated check suite</div><div class="step-desc">Execute all 47 validation checks against the production target. Checks run in order: row counts → referential integrity → field accuracy → null rates → status mapping. Any FAIL halts sign-off.</div></div>
+    </div>
+    <div class="sql-block">
+      <div class="sql-bar"><div class="sql-title-sm">run_validation_suite.sql · Full check suite</div><div class="sql-badge">T-SQL</div></div>
+      <pre><span class="cmt">-- Execute full validation suite and write to results table</span>
+<span class="kw">EXEC</span> validation.dbo.sp_run_full_suite
+    @source_db  <span class="op">=</span> <span class="str">'CRM_PROD_2019'</span>,
+    @target_db  <span class="op">=</span> <span class="str">'SF_Production_Snapshot'</span>,
+    @run_by     <span class="op">=</span> <span class="str">'valentina@maluxdata.io'</span>,
+    @run_date   <span class="op">=</span> <span class="fn">GETDATE</span>(),
+    @threshold_critical    <span class="op">=</span> <span class="num">0</span>,   <span class="cmt">-- zero tolerance</span>
+    @threshold_noncritical <span class="op">=</span> <span class="num">5</span>;   <span class="cmt">-- max 5 row delta</span>
+
+<span class="cmt">-- Review results</span>
+<span class="kw">SELECT</span> check_name, entity, status, source_val, target_val, delta
+<span class="kw">FROM</span> validation.dbo.check_results
+<span class="kw">WHERE</span> run_date <span class="op">=</span> <span class="fn">CAST</span>(<span class="fn">GETDATE</span>() <span class="kw">AS</span> DATE)
+<span class="kw">ORDER BY</span>
+    <span class="kw">CASE</span> status <span class="kw">WHEN</span> <span class="str">'FAIL'</span> <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">WHEN</span> <span class="str">'WARN'</span> <span class="kw">THEN</span> <span class="num">2</span> <span class="kw">ELSE</span> <span class="num">3</span> <span class="kw">END</span>;</pre>
+    </div>
+    <div class="checklist" data-phase="p4">
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">All row count checks pass (delta = 0 for critical entities)</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Referential integrity checks pass (zero orphaned records)</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Field accuracy spot check passes (&lt; 0.5% mismatch rate)</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Null rate delta within agreed tolerance</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">All WARN items reviewed and accepted by project sponsor</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Exception log produced and shared with stakeholders</div></div>
+    </div>
+    <div class="step-footer"><div class="owner-tag">Owner: BA Lead</div><div class="time-tag">Duration: 2–4 hours</div></div>
+  </div>
+</div>
+
+<!-- PHASE 5 -->
+<div class="phase-panel" id="p5">
+  <div class="phase-badge" style="background:rgba(175,169,236,.08);border-color:rgba(175,169,236,.3);color:var(--pL)">Phase 5 · Sign-off Gates</div>
+  <div class="gate-card" style="border-color:rgba(226,75,74,.3)">
+    <div class="gate-title"><span class="badge badge-fail">BLOCK</span>Gate 1 · Zero critical failures</div>
+    <div class="gate-desc">No migration sign-off until all FAIL checks are resolved. Critical entities (Registrant, Application) must have zero row count delta. Referential integrity must pass with zero orphaned records.</div>
+    <div class="gate-criteria">
+      <div class="gate-crit">Row count delta = 0 for all critical entities</div>
+      <div class="gate-crit">Zero orphaned application or contact records</div>
+      <div class="gate-crit">Evidence of root cause investigation for any prior FAILs</div>
+    </div>
+  </div>
+  <div class="gate-card" style="border-color:rgba(239,159,39,.3)">
+    <div class="gate-title"><span class="badge badge-warn">REVIEW</span>Gate 2 · All warnings reviewed and accepted</div>
+    <div class="gate-desc">Each WARN check must be individually reviewed by the project sponsor. Acceptance must be documented with rationale. A WARN cannot become a PASS simply by ignoring it.</div>
+    <div class="gate-criteria">
+      <div class="gate-crit">Written acceptance for each WARN from project sponsor</div>
+      <div class="gate-crit">Post-go-live remediation tasks logged in defect tracker</div>
+      <div class="gate-crit">Timeline for WARN remediation agreed</div>
+    </div>
+  </div>
+  <div class="gate-card" style="border-color:rgba(29,158,117,.3)">
+    <div class="gate-title"><span class="badge badge-ok">PASS</span>Gate 3 · Sign-off document produced and signed</div>
+    <div class="gate-desc">A formal sign-off report must be produced and physically/electronically signed by both project sponsor and technical lead before legacy system write access is removed.</div>
+    <div class="gate-criteria">
+      <div class="gate-crit">Validation evidence pack attached (all query results, screenshots)</div>
+      <div class="gate-crit">Sign-off report signed by project sponsor</div>
+      <div class="gate-crit">Sign-off report signed by technical lead</div>
+      <div class="gate-crit">Date/time of go-live recorded in migration log</div>
+    </div>
+  </div>
+  <div class="checklist" data-phase="p5">
+    <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">All Gate 1 criteria met (zero critical failures)</div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">All Gate 2 WARNs individually accepted with written rationale</div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Sign-off document signed by project sponsor</div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Sign-off document signed by technical lead</div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Evidence pack archived</div></div>
+  </div>
+</div>
+
+<!-- PHASE 6 -->
+<div class="phase-panel" id="p6">
+  <div class="phase-badge" style="background:rgba(29,158,117,.08);border-color:rgba(29,158,117,.3);color:var(--mint)">Phase 6 · Post-Go-Live Monitoring</div>
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(29,158,117,.1);color:var(--mint);border:1px solid rgba(29,158,117,.3)">6.1</div>
+      <div><div class="step-title">Daily delta check for first 2 weeks</div><div class="step-desc">Run a lightweight row count and referential integrity check daily for the first 14 days post-go-live. Any new delta should be investigated immediately — it may indicate a parallel write to the legacy system or a new ETL issue.</div></div>
+    </div>
+    <div class="sql-block">
+      <div class="sql-bar"><div class="sql-title-sm">daily_delta_check.sql · Schedule as nightly job</div><div class="sql-badge">T-SQL</div></div>
+      <pre><span class="cmt">-- Nightly delta check — alert if new discrepancies appear</span>
+<span class="kw">SELECT</span>
+    entity_name,
+    row_count                <span class="kw">AS</span> current_count,
+    baseline_count,
+    row_count <span class="op">-</span> baseline_count <span class="kw">AS</span> delta_since_golive,
+    <span class="fn">GETDATE</span>()               <span class="kw">AS</span> checked_at
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span> <span class="str">'Contact'</span> <span class="kw">AS</span> entity_name, <span class="fn">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> row_count
+    <span class="kw">FROM</span>   SF_Production.dbo.Contact
+    <span class="kw">WHERE</span>  Legacy_ID__c <span class="kw">IS NOT NULL</span>
+) curr
+<span class="kw">JOIN</span> validation_log.dbo.baseline_counts base
+    <span class="kw">ON</span> curr.entity_name <span class="op">=</span> base.entity_name
+<span class="kw">WHERE</span> <span class="fn">ABS</span>(row_count <span class="op">-</span> baseline_count) <span class="op">&gt;</span> <span class="num">0</span>;</pre>
+    </div>
+    <div class="checklist" data-phase="p6">
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Daily delta check scheduled as SQL Agent job</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Alert configured: email BA lead if delta &gt; 0</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Legacy system write access removed (read-only archive)</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Post-go-live WARN remediation tasks assigned with deadlines</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">2-week review meeting scheduled with project team</div></div>
+      <div class="check-item" onclick="toggle(this)"><div class="check-box"></div><div class="check-label">Migration retrospective completed and documented</div></div>
+    </div>
+    <div class="step-footer"><div class="owner-tag">Owner: BA + Operations</div><div class="time-tag">Duration: 2 weeks monitoring</div></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+const allChecks = document.querySelectorAll('.check-item');
+function updateProgress() {
+  const total = allChecks.length;
+  const done = document.querySelectorAll('.check-box.checked').length;
+  document.getElementById('progressLabel').textContent = `${done} / ${total} complete`;
+  document.getElementById('progressBar').style.width = `${Math.round(done/total*100)}%`;
+}
+function toggle(item) {
+  const box = item.querySelector('.check-box');
+  const label = item.querySelector('.check-label');
+  box.classList.toggle('checked');
+  label.classList.toggle('checked');
+  updateProgress();
+}
+function showPhase(id, btn) {
+  document.querySelectorAll('.phase-panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.pn').forEach(t=>t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+}
+updateProgress();
+</script>
+</body>
+</html>

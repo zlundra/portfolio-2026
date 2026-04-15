@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPI Definition & Data Lineage Catalogue</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0c1a;--s1:#16132a;--s2:#1e1a38;--border:rgba(175,169,236,.12);--bhi:rgba(175,169,236,.3);--purple:#7c5cfc;--pL:#afa9ec;--mint:#1d9e75;--amber:#ef9f27;--red:#e24b4a;--text:#eeedfe;--muted:#6a6a8a;--mono:'DM Mono',monospace;--display:'Syne',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(14,12,26,.95);backdrop-filter:blur(12px);z-index:100;flex-wrap:wrap;gap:.75rem}
+.nav-logo{font-family:var(--display);font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.5rem}
+.nav-logo span{color:var(--pL)}
+.search-bar{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+input[type=text]{background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:.75rem;padding:.45rem .9rem;border-radius:.35rem;outline:none;width:260px}
+input[type=text]:focus{border-color:var(--bhi)}
+select{background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:.72rem;padding:.4rem .75rem;border-radius:.35rem;outline:none;cursor:pointer}
+.wrap{padding:2rem;max-width:1100px;margin:0 auto}
+.s-label{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pL);margin-bottom:.4rem}
+.s-title{font-family:var(--display);font-size:1.5rem;font-weight:700;margin-bottom:.4rem}
+.s-sub{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.6}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin-bottom:2rem}
+.kpi-card{background:var(--s1);border:1px solid var(--border);border-radius:.75rem;padding:1.25rem;cursor:pointer;transition:all .2s}
+.kpi-card:hover{border-color:var(--bhi);transform:translateY(-1px)}
+.kpi-card.selected{border-color:rgba(124,92,252,.5);background:rgba(124,92,252,.06)}
+.kpi-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem}
+.kpi-name{font-family:var(--display);font-size:.9rem;font-weight:700}
+.kpi-id{font-size:.58rem;color:var(--muted);font-family:var(--mono);margin-top:.15rem}
+.kpi-desc{font-size:.7rem;color:var(--muted);line-height:1.6;margin-bottom:.75rem}
+.kpi-meta{display:flex;gap:.5rem;flex-wrap:wrap}
+.badge{font-size:.58rem;padding:.15rem .5rem;border-radius:100px;font-weight:500;display:inline-block;white-space:nowrap}
+.badge-p{background:rgba(124,92,252,.12);color:var(--pL);border:1px solid rgba(124,92,252,.3)}
+.badge-ok{background:rgba(29,158,117,.12);color:var(--mint);border:1px solid rgba(29,158,117,.3)}
+.badge-warn{background:rgba(239,159,39,.1);color:var(--amber);border:1px solid rgba(239,159,39,.3)}
+.badge-muted{background:rgba(175,169,236,.08);color:var(--muted);border:1px solid var(--border)}
+.detail-panel{display:none;position:fixed;right:0;top:0;width:500px;height:100vh;background:var(--s1);border-left:1px solid var(--bhi);z-index:200;overflow-y:auto;animation:slideIn .25s ease}
+.detail-panel.open{display:block}
+@keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+.detail-header{padding:1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:0;background:var(--s1);z-index:10}
+.detail-title{font-family:var(--display);font-size:1.1rem;font-weight:700;flex:1}
+.close-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.75rem;padding:.3rem .7rem;border-radius:.35rem;cursor:pointer;font-family:var(--mono)}
+.close-btn:hover{border-color:var(--bhi);color:var(--text)}
+.detail-body{padding:1.5rem}
+.detail-section{margin-bottom:1.5rem}
+.detail-section-title{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;font-weight:500}
+.detail-row{display:flex;justify-content:space-between;font-size:.72rem;padding:.4rem 0;border-top:1px solid rgba(175,169,236,.06)}
+.detail-key{color:var(--muted)}
+.detail-val{color:var(--text);text-align:right;max-width:60%;word-break:break-all}
+.sql-inline{background:var(--s2);border:1px solid var(--border);border-radius:.5rem;padding:1rem;font-size:.68rem;line-height:1.8;overflow-x:auto;margin-top:.5rem}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.cmt{color:#546e7a;font-style:italic}.num{color:#f78c6c}.op{color:var(--pL)}
+.lineage-node{background:var(--s2);border:1px solid var(--border);border-radius:.5rem;padding:.75rem 1rem;font-size:.7rem;margin-bottom:.4rem}
+.lineage-arrow{color:var(--muted);font-size:.7rem;margin-left:.75rem;display:block;margin-bottom:.4rem}
+.lineage-src{color:var(--amber)}.lineage-tgt{color:var(--mint)}.lineage-tf{color:var(--pL)}
+.issue-item{background:rgba(239,159,39,.06);border:1px solid rgba(239,159,39,.2);border-radius:.5rem;padding:.75rem;font-size:.7rem;color:var(--amber);margin-bottom:.4rem;line-height:1.6}
+.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.metric{background:var(--s1);border:1px solid var(--border);border-radius:.75rem;padding:1.1rem}
+.metric-label{font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.metric-val{font-family:var(--display);font-size:1.6rem;font-weight:700}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
+.overlay.open{display:block}
+@media(max-width:600px){.detail-panel{width:100%}.metric-row{grid-template-columns:1fr 1fr}nav{padding:1rem}input[type=text]{width:180px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">MaLux <span>·</span> KPI Catalogue</div>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search KPIs…" oninput="renderKPIs()">
+    <select id="domainFilter" onchange="renderKPIs()">
+      <option value="">All domains</option>
+      <option value="Registration">Registration</option>
+      <option value="Applications">Applications</option>
+      <option value="Compliance">Compliance</option>
+      <option value="Operations">Operations</option>
+    </select>
+    <select id="statusFilter" onchange="renderKPIs()">
+      <option value="">All statuses</option>
+      <option value="Live">Live</option>
+      <option value="Review">Needs review</option>
+      <option value="Draft">Draft</option>
+    </select>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="s-label">Portfolio Project · MaLux Data Consulting</div>
+  <div class="s-title">KPI Definition & Data Lineage Catalogue</div>
+  <div class="s-sub">Structured KPI catalogue for a regulated healthcare body. Each metric includes its business definition, SQL logic, source table, owner, refresh cadence, and known data issues. Built to resolve dashboard discrepancies and establish a single source of truth.</div>
+
+  <div class="metric-row">
+    <div class="metric"><div class="metric-label">KPIs defined</div><div class="metric-val">24</div></div>
+    <div class="metric"><div class="metric-label">Live in dashboard</div><div class="metric-val" style="color:var(--mint)">18</div></div>
+    <div class="metric"><div class="metric-label">Needs review</div><div class="metric-val" style="color:var(--amber)">4</div></div>
+    <div class="metric"><div class="metric-label">Source systems</div><div class="metric-val">3</div></div>
+  </div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-header">
+    <div>
+      <div class="detail-title" id="detailTitle"></div>
+      <div style="font-size:.6rem;color:var(--muted);margin-top:.25rem" id="detailId"></div>
+    </div>
+    <button class="close-btn" onclick="closeDetail()">✕ close</button>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</div>
+
+<script>
+const kpis = [
+  {
+    id:'KPI-001',name:'Total Active Registrants',domain:'Registration',status:'Live',
+    desc:'Count of registrants with status Active or Registered as of the report date. Used in board reporting and annual returns.',
+    owner:'Data & Insights',refresh:'Daily',source:'tbl_Registrant',dashboard:'Registrant Overview Dashboard',
+    sql:`SELECT COUNT(*) AS active_registrants
+FROM dbo.tbl_Registrant
+WHERE RegistrationStatus IN ('Active', 'Registered')
+  AND IsDeleted = 0
+  AND CAST(ExpiryDate AS DATE) >= CAST(GETDATE() AS DATE)`,
+    lineage:[
+      {type:'src',label:'Source · SQL Server · CRM_PROD_2019.dbo.tbl_Registrant'},
+      {type:'tf',label:'Transform · Filter: status IN (Active, Registered), not deleted, not expired'},
+      {type:'tgt',label:'Target · Power BI dataset · Registrant_Count measure'},
+    ],
+    issues:['ExpiryDate has 0.2% null rate — nulls currently excluded, may undercount by ~80 records','Status values are case-sensitive — "active" (lowercase) exists in 14 legacy records, not captured'],
+  },
+  {
+    id:'KPI-002',name:'New Registrations (MTD)',domain:'Registration',status:'Live',
+    desc:'Count of registrations approved in the current calendar month. Compared month-over-month in executive dashboard.',
+    owner:'Data & Insights',refresh:'Daily',source:'tbl_Registrant',dashboard:'Executive Summary',
+    sql:`SELECT COUNT(*) AS new_registrations_mtd
+FROM dbo.tbl_Registrant
+WHERE RegistrationStatus = 'Registered'
+  AND MONTH(ApprovalDate) = MONTH(GETDATE())
+  AND YEAR(ApprovalDate)  = YEAR(GETDATE())
+  AND IsDeleted = 0`,
+    lineage:[
+      {type:'src',label:'Source · SQL Server · tbl_Registrant.ApprovalDate'},
+      {type:'tf',label:'Transform · Filter: current month/year on ApprovalDate'},
+      {type:'tgt',label:'Target · Power BI · New_Registrations_MTD card'},
+    ],
+    issues:['ApprovalDate is sometimes populated with a backdated date by staff — may inflate/deflate MTD vs ProcessedDate'],
+  },
+  {
+    id:'KPI-003',name:'Application Processing Time (Avg Days)',domain:'Applications',status:'Review',
+    desc:'Average number of calendar days from application submission to first decision (Approved/Rejected). Key operational SLA metric.',
+    owner:'Operations',refresh:'Weekly',source:'tbl_Application',dashboard:'Operations Dashboard',
+    sql:`SELECT AVG(DATEDIFF(DAY, SubmissionDate, FirstDecisionDate)) AS avg_processing_days
+FROM dbo.tbl_Application
+WHERE FirstDecisionDate IS NOT NULL
+  AND SubmissionDate IS NOT NULL
+  AND YEAR(SubmissionDate) = YEAR(GETDATE())
+  AND IsDeleted = 0`,
+    lineage:[
+      {type:'src',label:'Source · SQL Server · tbl_Application (SubmissionDate, FirstDecisionDate)'},
+      {type:'tf',label:'Transform · DATEDIFF(DAY) on matched pairs · null exclusion'},
+      {type:'tgt',label:'Target · Power BI · Avg_Processing_Days KPI card'},
+    ],
+    issues:['FirstDecisionDate is null for 8.4% of applications — excluded from avg, skewing result downward','Applications withdrawn by applicant not filtered out — inflates avg by including abandoned cases'],
+  },
+  {
+    id:'KPI-004',name:'Lapsed Registrant Rate',domain:'Compliance',status:'Live',
+    desc:'Percentage of registrants whose registration has lapsed (expired without renewal) as a proportion of total active cohort. Regulatory reporting metric.',
+    owner:'Compliance',refresh:'Monthly',source:'tbl_Registrant',dashboard:'Compliance Report',
+    sql:`SELECT
+  CAST(
+    SUM(CASE WHEN RegistrationStatus = 'Lapsed' THEN 1 ELSE 0 END) AS FLOAT
+  ) / NULLIF(COUNT(*), 0) * 100 AS lapsed_rate_pct
+FROM dbo.tbl_Registrant
+WHERE IsDeleted = 0
+  AND RegistrationStatus NOT IN ('Archived','Withdrawn')`,
+    lineage:[
+      {type:'src',label:'Source · SQL Server · tbl_Registrant.RegistrationStatus'},
+      {type:'tf',label:'Transform · Ratio calc · Exclude Archived and Withdrawn'},
+      {type:'tgt',label:'Target · Power BI · Compliance Dashboard · Lapsed_Rate_%'},
+    ],
+    issues:['Lapsed-Pending sub-status not included in numerator — undercounts lapsed rate by ~0.3pp'],
+  },
+  {
+    id:'KPI-005',name:'First-Time Pass Rate (Assessment)',domain:'Applications',status:'Live',
+    desc:'Percentage of applicants who pass their competency assessment on the first attempt. Used to track assessment quality and applicant preparation.',
+    owner:'Assessment Team',refresh:'Weekly',source:'tbl_Assessment',dashboard:'Assessment Analytics',
+    sql:`SELECT
+  CAST(
+    SUM(CASE WHEN AttemptNumber = 1 AND Result = 'Pass' THEN 1 ELSE 0 END) AS FLOAT
+  ) / NULLIF(COUNT(DISTINCT ApplicantID), 0) * 100 AS first_time_pass_rate
+FROM dbo.tbl_Assessment
+WHERE AssessmentYear = YEAR(GETDATE())
+  AND IsDeleted = 0`,
+    lineage:[
+      {type:'src',label:'Source · SQL Server · tbl_Assessment'},
+      {type:'tf',label:'Transform · Filter AttemptNumber = 1 · distinct applicant count'},
+      {type:'tgt',label:'Target · Power BI · Assessment Dashboard'},
+    ],
+    issues:[],
+  },
+  {
+    id:'KPI-006',name:'Open Complaints (>30 days)',domain:'Compliance',status:'Review',
+    desc:'Count of complaints that have been open for more than 30 calendar days without a formal resolution. Escalation trigger for compliance team.',
+    owner:'Compliance',refresh:'Daily',source:'tbl_Complaint',dashboard:'Compliance Dashboard',
+    sql:`SELECT COUNT(*) AS open_complaints_over_30d
+FROM dbo.tbl_Complaint
+WHERE Status NOT IN ('Resolved','Closed','Withdrawn')
+  AND DATEDIFF(DAY, OpenedDate, GETDATE()) > 30
+  AND IsDeleted = 0`,
+    lineage:[
+      {type:'src',label:'Source · SQL Server · tbl_Complaint'},
+      {type:'tf',label:'Transform · Filter open status · DATEDIFF > 30 days'},
+      {type:'tgt',label:'Target · Power BI · Compliance Dashboard · Open_Complaints_Flag'},
+    ],
+    issues:['Status field has 7 distinct values — "In Review" and "Pending Info" behave as open but are excluded by some reports','OpenedDate is occasionally null for legacy imports — these records excluded, possible undercount'],
+  },
+  {
+    id:'KPI-007',name:'Portal Self-Service Adoption Rate',domain:'Operations',status:'Draft',
+    desc:'Percentage of registrant actions (renewals, address updates, document submissions) completed via the self-service portal vs. processed manually by staff.',
+    owner:'Digital Team',refresh:'Monthly',source:'MyPortal_Events DB',dashboard:'Not yet in dashboard',
+    sql:`SELECT
+  CAST(portal_actions AS FLOAT) / NULLIF(portal_actions + manual_actions, 0) * 100
+    AS self_service_pct
+FROM (
+  SELECT
+    SUM(CASE WHEN Channel = 'Portal' THEN 1 ELSE 0 END) AS portal_actions,
+    SUM(CASE WHEN Channel = 'Manual' THEN 1 ELSE 0 END) AS manual_actions
+  FROM dbo.tbl_RegistrantAction
+  WHERE ActionDate >= DATEADD(MONTH, -1, GETDATE())
+) sub`,
+    lineage:[
+      {type:'src',label:'Source · MyPortal_Events DB · tbl_RegistrantAction'},
+      {type:'tf',label:'Transform · Channel split · ratio calculation'},
+      {type:'tgt',label:'Target · Not yet connected to Power BI'},
+    ],
+    issues:['MyPortal_Events DB not yet connected to Power BI gateway — this KPI is in draft until connection is set up','Channel field has NULL for ~12% of actions logged before portal v2 launch'],
+  },
+  {
+    id:'KPI-008',name:'Renewal Rate (Annual)',domain:'Registration',status:'Live',
+    desc:'Percentage of registrants due for renewal in a given year who successfully renew before expiry. Core retention metric.',
+    owner:'Data & Insights',refresh:'Monthly',source:'tbl_Registrant',dashboard:'Registrant Overview',
+    sql:`SELECT
+  CAST(
+    SUM(CASE WHEN RenewalDate IS NOT NULL AND RenewalDate <= ExpiryDate THEN 1 ELSE 0 END) AS FLOAT
+  ) / NULLIF(COUNT(*), 0) * 100 AS renewal_rate_pct
+FROM dbo.tbl_Registrant
+WHERE YEAR(ExpiryDate) = YEAR(GETDATE())
+  AND IsDeleted = 0
+  AND RegistrationStatus NOT IN ('Archived','Withdrawn')`,
+    lineage:[
+      {type:'src',label:'Source · tbl_Registrant (ExpiryDate, RenewalDate)'},
+      {type:'tf',label:'Transform · Filter current expiry year · on-time renewal flag'},
+      {type:'tgt',label:'Target · Power BI · Renewal_Rate_% measure'},
+    ],
+    issues:[],
+  },
+];
+
+let selectedKPI = null;
+
+function renderKPIs() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const domain = document.getElementById('domainFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  let data = kpis.filter(k => {
+    const match = !q || [k.name,k.desc,k.id,k.domain].join(' ').toLowerCase().includes(q);
+    const domMatch = !domain || k.domain === domain;
+    const stMatch = !status || k.status === status;
+    return match && domMatch && stMatch;
+  });
+  const sCls = {Live:'badge-ok',Review:'badge-warn',Draft:'badge-muted'};
+  const dCls = {Registration:'badge-p',Applications:'badge-info',Compliance:'badge-warn',Operations:'badge-muted'};
+  const dClsExtra = {Applications:{background:'rgba(130,170,255,.1)',color:'#82aaff',border:'1px solid rgba(130,170,255,.3)'}};
+  document.getElementById('kpiGrid').innerHTML = data.map(k => `
+    <div class="kpi-card${selectedKPI===k.id?' selected':''}" onclick="openDetail('${k.id}')">
+      <div class="kpi-header">
+        <div><div class="kpi-name">${k.name}</div><div class="kpi-id">${k.id} · ${k.source}</div></div>
+        <span class="badge ${sCls[k.status]}">${k.status}</span>
+      </div>
+      <div class="kpi-desc">${k.desc.substring(0,100)}…</div>
+      <div class="kpi-meta">
+        <span class="badge badge-muted">${k.domain}</span>
+        <span class="badge badge-muted">${k.refresh}</span>
+        ${k.issues.length ? `<span class="badge badge-warn">${k.issues.length} issue${k.issues.length>1?'s':''}</span>` : '<span class="badge badge-ok">Clean</span>'}
+      </div>
+    </div>
+  `).join('');
+}
+
+function openDetail(id) {
+  const k = kpis.find(x=>x.id===id);
+  if (!k) return;
+  selectedKPI = id;
+  renderKPIs();
+  document.getElementById('detailTitle').textContent = k.name;
+  document.getElementById('detailId').textContent = `${k.id} · ${k.domain} · Owner: ${k.owner}`;
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">Definition</div>
+      <div style="font-size:.75rem;color:var(--muted);line-height:1.7">${k.desc}</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Metadata</div>
+      <div class="detail-row"><span class="detail-key">Dashboard</span><span class="detail-val">${k.dashboard}</span></div>
+      <div class="detail-row"><span class="detail-key">Source table</span><span class="detail-val" style="color:var(--amber)">${k.source}</span></div>
+      <div class="detail-row"><span class="detail-key">Refresh cadence</span><span class="detail-val">${k.refresh}</span></div>
+      <div class="detail-row"><span class="detail-key">Owner</span><span class="detail-val">${k.owner}</span></div>
+      <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val">${k.status}</span></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">SQL logic</div>
+      <pre class="sql-inline">${k.sql.replace(/SELECT/g,'<span class="kw">SELECT</span>').replace(/FROM/g,'<span class="kw">FROM</span>').replace(/WHERE/g,'<span class="kw">WHERE</span>').replace(/AND/g,'<span class="kw">AND</span>').replace(/OR/g,'<span class="kw">OR</span>').replace(/CAST\(/g,'<span class="fn">CAST</span>(').replace(/COUNT\(/g,'<span class="fn">COUNT</span>(').replace(/SUM\(/g,'<span class="fn">SUM</span>(').replace(/AVG\(/g,'<span class="fn">AVG</span>(').replace(/DATEDIFF\(/g,'<span class="fn">DATEDIFF</span>(').replace(/NULLIF\(/g,'<span class="fn">NULLIF</span>(').replace(/CASE/g,'<span class="kw">CASE</span>').replace(/WHEN/g,'<span class="kw">WHEN</span>').replace(/THEN/g,'<span class="kw">THEN</span>').replace(/ELSE/g,'<span class="kw">ELSE</span>').replace(/END/g,'<span class="kw">END</span>').replace(/IN/g,'<span class="kw">IN</span>').replace(/NOT IN/g,'<span class="kw">NOT IN</span>').replace(/IS NULL/g,'<span class="kw">IS NULL</span>').replace(/IS NOT NULL/g,'<span class="kw">IS NOT NULL</span>').replace(/'([^']+)'/g,"<span class='str'>'$1'</span>").replace(/--[^\n]*/g,m=>`<span class="cmt">${m}</span>`)}</pre>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Data lineage</div>
+      ${k.lineage.map(l=>`<div class="lineage-node ${l.type==='src'?'lineage-src':l.type==='tf'?'lineage-tf':'lineage-tgt'}">${l.label}</div>${l!==k.lineage[k.lineage.length-1]?'<div class="lineage-arrow">↓</div>':''}`).join('')}
+    </div>
+    ${k.issues.length ? `
+    <div class="detail-section">
+      <div class="detail-section-title">Known data issues</div>
+      ${k.issues.map(i=>`<div class="issue-item">⚠ ${i}</div>`).join('')}
+    </div>` : `<div class="detail-section"><div class="detail-section-title">Data issues</div><div style="font-size:.72rem;color:var(--mint)">✓ No known data quality issues</div></div>`}
+  `;
+  document.getElementById('detailPanel').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeDetail() {
+  selectedKPI = null;
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  renderKPIs();
+}
+
+renderKPIs();
+</script>
+</body>
+</html>

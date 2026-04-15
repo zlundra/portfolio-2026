@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Migration Validation Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0c1a;--s1:#16132a;--s2:#1e1a38;--border:rgba(175,169,236,.12);--bhi:rgba(175,169,236,.3);--purple:#7c5cfc;--pL:#afa9ec;--mint:#1d9e75;--amber:#ef9f27;--red:#e24b4a;--text:#eeedfe;--muted:#6a6a8a;--mono:'DM Mono',monospace;--display:'Syne',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(14,12,26,.95);backdrop-filter:blur(12px);z-index:100;flex-wrap:wrap;gap:.75rem}
+.nav-logo{font-family:var(--display);font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.5rem}
+.nav-logo span{color:var(--pL)}
+.nav-tabs{display:flex;gap:.25rem;flex-wrap:wrap}
+.nt{background:transparent;border:1px solid transparent;color:var(--muted);font-family:var(--mono);font-size:.72rem;padding:.4rem .9rem;border-radius:.35rem;cursor:pointer;transition:all .2s}
+.nt:hover{color:var(--text);border-color:var(--bhi)}
+.nt.on{background:rgba(124,92,252,.15);border-color:rgba(124,92,252,.4);color:var(--pL)}
+.panel{display:none;padding:2rem;max-width:1100px;margin:0 auto;animation:fi .3s ease}
+.panel.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.s-label{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pL);margin-bottom:.4rem}
+.s-title{font-family:var(--display);font-size:1.5rem;font-weight:700;margin-bottom:.4rem}
+.s-sub{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.6}
+.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.metric{background:var(--s1);border:1px solid var(--border);border-radius:.75rem;padding:1.25rem}
+.metric-label{font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.metric-val{font-family:var(--display);font-size:1.7rem;font-weight:700}
+.metric-delta{font-size:.62rem;color:var(--muted);margin-top:.25rem}
+.check-table{width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:1.5rem}
+.check-table th{text-align:left;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:.5rem 1rem;border-bottom:1px solid var(--border)}
+.check-table td{padding:.75rem 1rem;border-bottom:1px solid rgba(175,169,236,.06);vertical-align:middle}
+.check-table tr:hover td{background:rgba(124,92,252,.04)}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.5rem}
+.ok{color:var(--mint)}.warn{color:var(--amber)}.fail{color:var(--red)}
+.dot-ok{background:var(--mint)}.dot-warn{background:var(--amber)}.dot-fail{background:var(--red)}
+.badge{font-size:.58rem;padding:.15rem .5rem;border-radius:100px;font-weight:500;display:inline-block;white-space:nowrap}
+.badge-ok{background:rgba(29,158,117,.15);color:var(--mint);border:1px solid rgba(29,158,117,.3)}
+.badge-warn{background:rgba(239,159,39,.1);color:var(--amber);border:1px solid rgba(239,159,39,.3)}
+.badge-fail{background:rgba(226,75,74,.12);color:var(--red);border:1px solid rgba(226,75,74,.3)}
+.badge-info{background:rgba(124,92,252,.12);color:var(--pL);border:1px solid rgba(124,92,252,.3)}
+.sql-block{background:var(--s2);border:1px solid var(--border);border-radius:.75rem;overflow:hidden;margin-bottom:1.25rem}
+.sql-bar{display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem;border-bottom:1px solid var(--border);background:rgba(255,255,255,.03)}
+.sql-dot{width:10px;height:10px;border-radius:50%}
+.sql-title{font-size:.65rem;color:var(--muted);flex:1}
+.sql-badge{font-size:.58rem;padding:.15rem .5rem;border-radius:.25rem;background:rgba(124,92,252,.12);color:var(--pL)}
+pre{padding:1.25rem;font-size:.72rem;line-height:1.8;overflow-x:auto;tab-size:2}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.cmt{color:#546e7a;font-style:italic}.num{color:#f78c6c}.op{color:var(--pL)}
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.diff-card{background:var(--s1);border:1px solid var(--border);border-radius:.75rem;padding:1.25rem}
+.diff-title{font-size:.72rem;font-weight:500;margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem}
+.diff-row{display:flex;justify-content:space-between;font-size:.68rem;padding:.35rem 0;border-top:1px solid rgba(175,169,236,.06)}
+.diff-key{color:var(--muted)}
+.diff-val-src{color:var(--amber)}
+.diff-val-tgt{color:var(--mint)}
+.progress-bar{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin:.5rem 0}
+.progress-fill{height:100%;border-radius:3px}
+.step-list{display:flex;flex-direction:column;gap:.75rem}
+.step-item{background:var(--s1);border:1px solid var(--border);border-radius:.75rem;padding:1.25rem;display:flex;gap:1rem;align-items:flex-start}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:600;flex-shrink:0}
+.step-body{flex:1}
+.step-title{font-family:var(--display);font-size:.85rem;font-weight:600;margin-bottom:.3rem}
+.step-desc{font-size:.7rem;color:var(--muted);line-height:1.65;margin-bottom:.4rem}
+.step-query{font-size:.62rem;font-family:var(--mono);color:var(--pL);background:rgba(124,92,252,.08);border:1px solid rgba(124,92,252,.2);padding:.25rem .6rem;border-radius:.25rem;display:inline-block}
+.exception-row{background:var(--s1);border:1px solid var(--border);border-radius:.5rem;padding:1rem;margin-bottom:.6rem;font-size:.7rem}
+.exc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem}
+.exc-title{font-weight:500;font-family:var(--display);font-size:.8rem}
+.exc-detail{color:var(--muted);line-height:1.6}
+.exc-sql{font-size:.62rem;font-family:var(--mono);color:var(--amber);margin-top:.5rem;padding:.25rem .6rem;background:rgba(239,159,39,.06);border-radius:.25rem;border:1px solid rgba(239,159,39,.2)}
+@media(max-width:700px){.metric-row{grid-template-columns:1fr 1fr}.diff-grid{grid-template-columns:1fr}nav{padding:1rem}.nt{padding:.3rem .6rem;font-size:.65rem}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">MaLux <span>·</span> CRM Migration Validation Suite</div>
+  <div class="nav-tabs">
+    <button class="nt on" onclick="show('overview',this)">Overview</button>
+    <button class="nt" onclick="show('checks',this)">Validation checks</button>
+    <button class="nt" onclick="show('queries',this)">SQL queries</button>
+    <button class="nt" onclick="show('exceptions',this)">Exceptions log</button>
+    <button class="nt" onclick="show('steps',this)">Remediation steps</button>
+  </div>
+</nav>
+
+<div class="panel on" id="overview">
+  <div class="s-label">Portfolio Project · MaLux Data Consulting</div>
+  <div class="s-title">CRM Migration Validation</div>
+  <div class="s-sub">Post-migration validation between legacy SQL Server CRM and new Salesforce org. Row count reconciliation, field-level accuracy, referential integrity, and structured sign-off report.</div>
+  <div class="metric-row">
+    <div class="metric"><div class="metric-label">Total checks run</div><div class="metric-val">47</div><div class="metric-delta">across 8 entity types</div></div>
+    <div class="metric"><div class="metric-label">Passed</div><div class="metric-val" style="color:var(--mint)">39</div><div class="metric-delta" style="color:var(--mint)">82.9% pass rate</div></div>
+    <div class="metric"><div class="metric-label">Warnings</div><div class="metric-val" style="color:var(--amber)">6</div><div class="metric-delta" style="color:var(--amber)">acceptable delta</div></div>
+    <div class="metric"><div class="metric-label">Failures</div><div class="metric-val" style="color:var(--red)">2</div><div class="metric-delta" style="color:var(--red)">blocking sign-off</div></div>
+  </div>
+  <div class="diff-grid">
+    <div class="diff-card">
+      <div class="diff-title"><span style="color:var(--amber)">Source</span> SQL Server · Legacy CRM</div>
+      <div class="diff-row"><span class="diff-key">Database</span><span class="diff-val-src">CRM_PROD_2019</span></div>
+      <div class="diff-row"><span class="diff-key">Total records</span><span class="diff-val-src">42,847</span></div>
+      <div class="diff-row"><span class="diff-key">Active registrants</span><span class="diff-val-src">38,104</span></div>
+      <div class="diff-row"><span class="diff-key">Linked applications</span><span class="diff-val-src">156,321</span></div>
+      <div class="diff-row"><span class="diff-key">Archived records</span><span class="diff-val-src">4,743</span></div>
+      <div class="diff-row"><span class="diff-key">Schema version</span><span class="diff-val-src">v4.2 (2019)</span></div>
+    </div>
+    <div class="diff-card">
+      <div class="diff-title"><span style="color:var(--mint)">Target</span> Salesforce · New CRM</div>
+      <div class="diff-row"><span class="diff-key">Object</span><span class="diff-val-tgt">Contact / Account</span></div>
+      <div class="diff-row"><span class="diff-key">Total records</span><span class="diff-val-tgt">42,831</span></div>
+      <div class="diff-row"><span class="diff-key">Active registrants</span><span class="diff-val-tgt">38,104</span></div>
+      <div class="diff-row"><span class="diff-key">Linked applications</span><span class="diff-val-tgt">156,318</span></div>
+      <div class="diff-row"><span class="diff-key">Archived records</span><span class="diff-val-tgt">4,727</span></div>
+      <div class="diff-row"><span class="diff-key">Schema version</span><span class="diff-val-tgt">SF Spring '25</span></div>
+    </div>
+  </div>
+  <div style="background:var(--s1);border:1px solid rgba(226,75,74,.3);border-radius:.75rem;padding:1.25rem;font-size:.75rem">
+    <div style="color:var(--red);font-weight:600;font-family:var(--display);margin-bottom:.5rem">⚠ 2 blocking failures — sign-off held</div>
+    <div style="color:var(--muted);line-height:1.7">
+      <b style="color:var(--text)">1.</b> Row count delta on <code style="color:var(--pL)">tbl_Registrant</code>: 16 records missing in target. Investigation required before go-live.<br>
+      <b style="color:var(--text)">2.</b> Referential integrity failure: 3 application records link to registrant IDs not present in target Contact object.
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="checks">
+  <div class="s-label">Validation results</div>
+  <div class="s-title">Check-by-check breakdown</div>
+  <div class="s-sub">47 automated checks across row counts, field accuracy, null rates, referential integrity, and status mapping. Click any row to see the underlying SQL.</div>
+  <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+    <button class="nt on" onclick="filterChecks('all',this)">All (47)</button>
+    <button class="nt" onclick="filterChecks('pass',this)">Pass (39)</button>
+    <button class="nt" onclick="filterChecks('warn',this)">Warn (6)</button>
+    <button class="nt" onclick="filterChecks('fail',this)">Fail (2)</button>
+  </div>
+  <table class="check-table" id="checkTable">
+    <thead><tr>
+      <th>Status</th><th>Check name</th><th>Entity</th><th>Source</th><th>Target</th><th>Delta</th><th>Category</th>
+    </tr></thead>
+    <tbody id="checkBody"></tbody>
+  </table>
+</div>
+
+<div class="panel" id="queries">
+  <div class="s-label">SQL validation queries</div>
+  <div class="s-title">Source vs target checks</div>
+  <div class="s-sub">Reusable T-SQL and SOQL queries used across the validation suite. All queries designed to be idempotent and run against read-only snapshots.</div>
+
+  <div class="sql-block">
+    <div class="sql-bar"><div class="sql-dot" style="background:#ff5f57"></div><div class="sql-dot" style="background:#ffbd2e"></div><div class="sql-dot" style="background:#28c840"></div><div class="sql-title">01_row_count_reconciliation.sql · SQL Server (source)</div><div class="sql-badge">T-SQL</div></div>
+    <pre><span class="cmt">-- Row count reconciliation: source vs target per entity</span>
+<span class="kw">SELECT</span>
+    <span class="str">'tbl_Registrant'</span>   <span class="kw">AS</span> entity,
+    <span class="fn">COUNT</span>(<span class="op">*</span>)          <span class="kw">AS</span> source_count,
+    <span class="num">42831</span>             <span class="kw">AS</span> target_count,
+    <span class="fn">COUNT</span>(<span class="op">*</span>) <span class="op">-</span> <span class="num">42831</span> <span class="kw">AS</span> delta,
+    <span class="kw">CASE</span> <span class="kw">WHEN</span> <span class="fn">ABS</span>(<span class="fn">COUNT</span>(<span class="op">*</span>) <span class="op">-</span> <span class="num">42831</span>) <span class="op">=</span> <span class="num">0</span>   <span class="kw">THEN</span> <span class="str">'PASS'</span>
+         <span class="kw">WHEN</span> <span class="fn">ABS</span>(<span class="fn">COUNT</span>(<span class="op">*</span>) <span class="op">-</span> <span class="num">42831</span>) <span class="op">&lt;=</span> <span class="num">5</span>  <span class="kw">THEN</span> <span class="str">'WARN'</span>
+         <span class="kw">ELSE</span> <span class="str">'FAIL'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> status
+<span class="kw">FROM</span> CRM_PROD_2019.dbo.tbl_Registrant
+<span class="kw">WHERE</span> IsDeleted <span class="op">=</span> <span class="num">0</span>
+
+<span class="kw">UNION ALL</span>
+
+<span class="kw">SELECT</span>
+    <span class="str">'tbl_Application'</span>,
+    <span class="fn">COUNT</span>(<span class="op">*</span>),
+    <span class="num">156318</span>,
+    <span class="fn">COUNT</span>(<span class="op">*</span>) <span class="op">-</span> <span class="num">156318</span>,
+    <span class="kw">CASE</span> <span class="kw">WHEN</span> <span class="fn">ABS</span>(<span class="fn">COUNT</span>(<span class="op">*</span>) <span class="op">-</span> <span class="num">156318</span>) <span class="op">=</span> <span class="num">0</span>   <span class="kw">THEN</span> <span class="str">'PASS'</span>
+         <span class="kw">WHEN</span> <span class="fn">ABS</span>(<span class="fn">COUNT</span>(<span class="op">*</span>) <span class="op">-</span> <span class="num">156318</span>) <span class="op">&lt;=</span> <span class="num">10</span> <span class="kw">THEN</span> <span class="str">'WARN'</span>
+         <span class="kw">ELSE</span> <span class="str">'FAIL'</span>
+    <span class="kw">END</span>
+<span class="kw">FROM</span> CRM_PROD_2019.dbo.tbl_Application;</pre>
+  </div>
+
+  <div class="sql-block">
+    <div class="sql-bar"><div class="sql-dot" style="background:#ff5f57"></div><div class="sql-dot" style="background:#ffbd2e"></div><div class="sql-dot" style="background:#28c840"></div><div class="sql-title">02_field_accuracy_spot_check.sql · SQL Server (source)</div><div class="sql-badge">T-SQL</div></div>
+    <pre><span class="cmt">-- Field-level accuracy: compare key fields for matched records</span>
+<span class="cmt">-- Join on migrated external ID field (Legacy_ID__c in Salesforce)</span>
+<span class="kw">SELECT</span>
+    src.RegistrantID,
+    src.Surname        <span class="kw">AS</span> src_surname,
+    tgt.LastName       <span class="kw">AS</span> tgt_surname,
+    src.DateOfBirth    <span class="kw">AS</span> src_dob,
+    tgt.Birthdate      <span class="kw">AS</span> tgt_dob,
+    src.PINNumber      <span class="kw">AS</span> src_pin,
+    tgt.PIN__c         <span class="kw">AS</span> tgt_pin,
+    src.RegistrationStatus  <span class="kw">AS</span> src_status,
+    tgt.Registration_Status__c <span class="kw">AS</span> tgt_status,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> src.Surname <span class="op">&lt;&gt;</span> tgt.LastName          <span class="kw">THEN</span> <span class="str">'SURNAME_MISMATCH'</span>
+        <span class="kw">WHEN</span> src.DateOfBirth <span class="op">&lt;&gt;</span> tgt.Birthdate      <span class="kw">THEN</span> <span class="str">'DOB_MISMATCH'</span>
+        <span class="kw">WHEN</span> src.PINNumber <span class="op">&lt;&gt;</span> tgt.PIN__c           <span class="kw">THEN</span> <span class="str">'PIN_MISMATCH'</span>
+        <span class="kw">ELSE</span> <span class="str">'MATCH'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> field_check
+<span class="kw">FROM</span> CRM_PROD_2019.dbo.tbl_Registrant src
+<span class="kw">INNER JOIN</span> Salesforce_Snapshot.dbo.Contact tgt
+    <span class="kw">ON</span> src.RegistrantID <span class="op">=</span> tgt.Legacy_ID__c
+<span class="kw">WHERE</span>
+    src.Surname <span class="op">&lt;&gt;</span> tgt.LastName
+    <span class="kw">OR</span> src.DateOfBirth <span class="op">&lt;&gt;</span> tgt.Birthdate
+    <span class="kw">OR</span> src.PINNumber <span class="op">&lt;&gt;</span> tgt.PIN__c
+<span class="kw">ORDER BY</span> field_check, src.RegistrantID;</pre>
+  </div>
+
+  <div class="sql-block">
+    <div class="sql-bar"><div class="sql-dot" style="background:#ff5f57"></div><div class="sql-dot" style="background:#ffbd2e"></div><div class="sql-dot" style="background:#28c840"></div><div class="sql-title">03_referential_integrity.sql · Cross-database check</div><div class="sql-badge">T-SQL</div></div>
+    <pre><span class="cmt">-- Referential integrity: find orphaned application records</span>
+<span class="cmt">-- Applications in target that have no matching Contact</span>
+<span class="kw">SELECT</span>
+    app.Id             <span class="kw">AS</span> sf_application_id,
+    app.Legacy_ID__c   <span class="kw">AS</span> legacy_app_id,
+    app.Contact__c     <span class="kw">AS</span> linked_contact_id,
+    app.Application_Date__c,
+    app.Status__c,
+    <span class="str">'ORPHANED_APPLICATION'</span> <span class="kw">AS</span> issue_type
+<span class="kw">FROM</span> Salesforce_Snapshot.dbo.Application__c app
+<span class="kw">LEFT JOIN</span> Salesforce_Snapshot.dbo.Contact con
+    <span class="kw">ON</span> app.Contact__c <span class="op">=</span> con.Id
+<span class="kw">WHERE</span> con.Id <span class="kw">IS NULL</span>
+    <span class="kw">AND</span> app.IsDeleted <span class="op">=</span> <span class="num">0</span>
+<span class="kw">ORDER BY</span> app.Application_Date__c <span class="kw">DESC</span>;
+
+<span class="cmt">-- Result: 3 orphaned records found — blocking sign-off</span></pre>
+  </div>
+
+  <div class="sql-block">
+    <div class="sql-bar"><div class="sql-dot" style="background:#ff5f57"></div><div class="sql-dot" style="background:#ffbd2e"></div><div class="sql-dot" style="background:#28c840"></div><div class="sql-title">04_null_rate_comparison.sql · Null rate audit</div><div class="sql-badge">T-SQL</div></div>
+    <pre><span class="cmt">-- Null rate comparison: key fields source vs target</span>
+<span class="kw">SELECT</span>
+    <span class="str">'Source'</span> <span class="kw">AS</span> system,
+    <span class="fn">COUNT</span>(<span class="op">*</span>)                                        <span class="kw">AS</span> total,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> PINNumber       <span class="kw">IS NULL THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> null_pin,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> DateOfBirth     <span class="kw">IS NULL THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> null_dob,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> EmailAddress    <span class="kw">IS NULL THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> null_email,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> AddressLine1    <span class="kw">IS NULL THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> null_address
+<span class="kw">FROM</span> CRM_PROD_2019.dbo.tbl_Registrant
+
+<span class="kw">UNION ALL</span>
+
+<span class="kw">SELECT</span>
+    <span class="str">'Target'</span>,
+    <span class="fn">COUNT</span>(<span class="op">*</span>),
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> PIN__c          <span class="kw">IS NULL THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>),
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> Birthdate       <span class="kw">IS NULL THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>),
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> Email           <span class="kw">IS NULL THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>),
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> MailingStreet   <span class="kw">IS NULL THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>)
+<span class="kw">FROM</span> Salesforce_Snapshot.dbo.Contact
+<span class="kw">WHERE</span> Legacy_ID__c <span class="kw">IS NOT NULL</span>;</pre>
+  </div>
+</div>
+
+<div class="panel" id="exceptions">
+  <div class="s-label">Exception log</div>
+  <div class="s-title">Failures & warnings detail</div>
+  <div class="s-sub">8 exceptions requiring analyst review. 2 are blocking — migration sign-off cannot proceed until resolved.</div>
+  <div id="excList"></div>
+</div>
+
+<div class="panel" id="steps">
+  <div class="s-label">Remediation playbook</div>
+  <div class="s-title">Step-by-step resolution</div>
+  <div class="s-sub">Structured remediation steps for each failure type. Each step includes the investigation query and recommended action.</div>
+  <div class="step-list" id="stepList"></div>
+</div>
+
+<script>
+const checks = [
+  {status:'fail',name:'Row count: tbl_Registrant',entity:'Registrant',src:'42,847',tgt:'42,831',delta:'-16',cat:'Row count'},
+  {status:'fail',name:'Referential integrity: Application → Contact',entity:'Application',src:'156,321',tgt:'156,318',delta:'-3 orphan',cat:'Integrity'},
+  {status:'warn',name:'Null rate: PINNumber / PIN__c',entity:'Registrant',src:'0.4%',tgt:'0.4%',delta:'0pp',cat:'Null rate'},
+  {status:'warn',name:'Null rate: AddressLine1 / MailingStreet',entity:'Registrant',src:'8.1%',tgt:'9.3%',delta:'+1.2pp',cat:'Null rate'},
+  {status:'warn',name:'Status mapping: Lapsed → Inactive',entity:'Registrant',src:'4,102',tgt:'4,089',delta:'-13',cat:'Mapping'},
+  {status:'warn',name:'Date format: DateOfBirth (1900-01-01 sentinel)',entity:'Registrant',src:'0.2%',tgt:'0.2%',delta:'0pp',cat:'Data quality'},
+  {status:'warn',name:'Row count: tbl_AuditLog',entity:'Audit log',src:'2,841,003',tgt:'2,840,991',delta:'-12',cat:'Row count'},
+  {status:'warn',name:'Null rate: EmailAddress / Email',entity:'Registrant',src:'14.2%',tgt:'14.2%',delta:'0pp',cat:'Null rate'},
+  {status:'pass',name:'Row count: tbl_Application',entity:'Application',src:'156,321',tgt:'156,318',delta:'-3*',cat:'Row count'},
+  {status:'pass',name:'Field accuracy: Surname / LastName (sample 1k)',entity:'Registrant',src:'1,000',tgt:'997 match',delta:'0.3%',cat:'Accuracy'},
+  {status:'pass',name:'Field accuracy: DateOfBirth / Birthdate (sample 1k)',entity:'Registrant',src:'1,000',tgt:'999 match',delta:'0.1%',cat:'Accuracy'},
+  {status:'pass',name:'Field accuracy: PINNumber / PIN__c (sample 1k)',entity:'Registrant',src:'1,000',tgt:'1,000 match',delta:'0%',cat:'Accuracy'},
+  {status:'pass',name:'Status mapping: Active → Active',entity:'Registrant',src:'38,104',tgt:'38,104',delta:'0',cat:'Mapping'},
+  {status:'pass',name:'Status mapping: Registered → Registered',entity:'Registrant',src:'28,441',tgt:'28,441',delta:'0',cat:'Mapping'},
+  {status:'pass',name:'Row count: tbl_Address',entity:'Address',src:'39,204',tgt:'39,204',delta:'0',cat:'Row count'},
+  {status:'pass',name:'Row count: tbl_Document',entity:'Document',src:'88,441',tgt:'88,441',delta:'0',cat:'Row count'},
+  {status:'pass',name:'Referential integrity: Address → Registrant',entity:'Address',src:'39,204',tgt:'39,204',delta:'0',cat:'Integrity'},
+  {status:'pass',name:'Field accuracy: EmailAddress / Email (sample 1k)',entity:'Registrant',src:'1,000',tgt:'1,000 match',delta:'0%',cat:'Accuracy'},
+];
+
+let checkFilter = 'all';
+function filterChecks(f, btn) {
+  checkFilter = f;
+  document.querySelectorAll('#checks .nt').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderChecks();
+}
+function renderChecks() {
+  const data = checkFilter==='all' ? checks : checks.filter(c=>c.status===checkFilter);
+  const cls = {pass:'badge-ok',warn:'badge-warn',fail:'badge-fail'};
+  const lbl = {pass:'Pass',warn:'Warn',fail:'Fail'};
+  document.getElementById('checkBody').innerHTML = data.map(c=>`
+    <tr>
+      <td><span class="badge ${cls[c.status]}">${lbl[c.status]}</span></td>
+      <td style="font-weight:500;max-width:280px">${c.name}</td>
+      <td style="color:var(--muted)">${c.entity}</td>
+      <td style="font-family:var(--mono);font-size:.68rem;color:var(--amber)">${c.src}</td>
+      <td style="font-family:var(--mono);font-size:.68rem;color:var(--mint)">${c.tgt}</td>
+      <td style="font-family:var(--mono);font-size:.68rem;color:${c.status==='fail'?'var(--red)':c.status==='warn'?'var(--amber)':'var(--mint)'}">${c.delta}</td>
+      <td><span class="badge badge-info">${c.cat}</span></td>
+    </tr>
+  `).join('');
+}
+renderChecks();
+
+const exceptions = [
+  {status:'fail',title:'16 registrant records missing from target',desc:'Row count on tbl_Registrant shows 42,847 in source vs 42,831 in target. Delta of 16 records. Likely caused by records created between migration snapshot and go-live window, OR records that failed ETL validation silently. Must be investigated before sign-off.',sql:"SELECT r.RegistrantID, r.Surname, r.PINNumber, r.CreatedDate FROM CRM_PROD_2019.dbo.tbl_Registrant r LEFT JOIN Salesforce_Snapshot.dbo.Contact c ON r.RegistrantID = c.Legacy_ID__c WHERE c.Id IS NULL AND r.IsDeleted = 0"},
+  {status:'fail',title:'3 orphaned application records in target',desc:'Three Application__c records in Salesforce reference Contact IDs that do not exist. This will cause referential integrity errors in any application history views and prevent clean data access. Records must be either re-linked or flagged for deletion.',sql:"SELECT app.Id, app.Legacy_ID__c, app.Contact__c, app.Status__c FROM Salesforce_Snapshot.dbo.Application__c app LEFT JOIN Salesforce_Snapshot.dbo.Contact con ON app.Contact__c = con.Id WHERE con.Id IS NULL"},
+  {status:'warn',title:'13 Lapsed status records not mapped to Inactive',desc:'Source has 4,102 Lapsed registrants. Target has 4,089 Inactive. Delta of 13 records where status mapping did not apply correctly. Likely caused by a secondary status value (Lapsed-Pending) that was not included in the ETL mapping logic.',sql:"SELECT r.RegistrantID, r.RegistrationStatus FROM CRM_PROD_2019.dbo.tbl_Registrant r WHERE r.RegistrationStatus IN ('Lapsed','Lapsed-Pending') AND r.IsDeleted = 0"},
+  {status:'warn',title:'Address null rate increased by 1.2pp in target',desc:'Source: 8.1% null MailingStreet. Target: 9.3%. Possible cause: ETL dropped records where address was non-standard format (PO Box entries, multi-line addresses). 490 records affected. Not blocking but should be remediated in post-go-live clean-up sprint.',sql:"SELECT c.Id, c.Legacy_ID__c, c.MailingStreet FROM Salesforce_Snapshot.dbo.Contact c WHERE c.MailingStreet IS NULL AND c.Legacy_ID__c IS NOT NULL"},
+  {status:'warn',title:'12 audit log rows missing from target',desc:'tbl_AuditLog: 2,841,003 source vs 2,840,991 target. Delta of 12. These are likely very recent log entries created after the audit log snapshot was taken. Low risk — audit log completeness is acceptable within a 0.001% threshold.',sql:"SELECT TOP 20 a.AuditID, a.ActionDate, a.ActionType FROM CRM_PROD_2019.dbo.tbl_AuditLog a ORDER BY a.ActionDate DESC"},
+];
+
+document.getElementById('excList').innerHTML = exceptions.map(e=>`
+  <div class="exception-row" style="border-color:${e.status==='fail'?'rgba(226,75,74,.3)':'rgba(239,159,39,.25)'}">
+    <div class="exc-header">
+      <div class="exc-title">${e.title}</div>
+      <span class="badge ${e.status==='fail'?'badge-fail':'badge-warn'}">${e.status==='fail'?'BLOCKING':'Warning'}</span>
+    </div>
+    <div class="exc-detail">${e.desc}</div>
+    <div class="exc-sql"><b>Investigation query:</b> ${e.sql.substring(0,120)}...</div>
+  </div>
+`).join('');
+
+const steps = [
+  {n:'01',color:'rgba(226,75,74,.2)',border:'rgba(226,75,74,.4)',textColor:'var(--red)',title:'Investigate 16 missing registrant records',desc:'Run the orphan detection query against both source and target. Cross-reference against migration ETL error log (etl_errors table in staging DB). Determine if records were created post-snapshot or failed ETL silently.',query:'SELECT * FROM staging.dbo.etl_errors WHERE entity = \'tbl_Registrant\' ORDER BY error_timestamp DESC',action:'If post-snapshot: re-run targeted ETL for those 16 IDs. If ETL failure: fix root cause and re-migrate records individually. Re-run row count check.'},
+  {n:'02',color:'rgba(226,75,74,.2)',border:'rgba(226,75,74,.4)',textColor:'var(--red)',title:'Resolve 3 orphaned application records',desc:'Identify the original Contact ID these applications were linked to in source. Determine if the Contact was migrated under a different Salesforce ID (possible merge scenario) or is genuinely missing.',query:'SELECT app.Legacy_ID__c, src.RegistrantID, src.Surname FROM Salesforce_Snapshot.dbo.Application__c app JOIN CRM_PROD_2019.dbo.tbl_Application src ON app.Legacy_ID__c = src.ApplicationID',action:'Option A: Re-link to correct Contact. Option B: If registrant genuinely not migrated, hold application record in a pending state. Document decision in migration log.'},
+  {n:'03',color:'rgba(239,159,39,.15)',border:'rgba(239,159,39,.35)',textColor:'var(--amber)',title:'Fix Lapsed → Inactive status mapping (13 records)',desc:'The ETL status mapping table likely does not include the secondary Lapsed-Pending value. Update the mapping table and re-process the 13 affected records.',query:'UPDATE Salesforce_Snapshot.dbo.Contact SET Registration_Status__c = \'Inactive\' WHERE Legacy_ID__c IN (SELECT RegistrantID FROM CRM_PROD_2019.dbo.tbl_Registrant WHERE RegistrationStatus = \'Lapsed-Pending\')',action:'Update ETL mapping config to include Lapsed-Pending → Inactive. Re-run status update for 13 records. Re-run mapping check to confirm delta = 0.'},
+  {n:'04',color:'rgba(239,159,39,.15)',border:'rgba(239,159,39,.35)',textColor:'var(--amber)',title:'Address null rate remediation (490 records)',desc:'Extract the 490 records with null MailingStreet from target. Cross-reference with source to retrieve original address values. Determine if format caused ETL drop.',query:'SELECT c.Legacy_ID__c, src.AddressLine1, src.AddressLine2 FROM Salesforce_Snapshot.dbo.Contact c JOIN CRM_PROD_2019.dbo.tbl_Address src ON c.Legacy_ID__c = src.RegistrantID WHERE c.MailingStreet IS NULL',action:'For PO Box / multi-line records: write a targeted address mapping function. Update MailingStreet for the 490 records as a post-go-live clean-up task. Document in the defect log.'},
+  {n:'05',color:'rgba(29,158,117,.12)',border:'rgba(29,158,117,.3)',textColor:'var(--mint)',title:'Document sign-off criteria and obtain approval',desc:'Once steps 01–02 are resolved and row count delta = 0 with no orphaned records, produce the migration validation sign-off report. Include all check results, exception log, and remediation evidence.',query:'-- Re-run full check suite after remediation\nEXEC sp_validation_suite @run_date = GETDATE(), @environment = \'PROD\', @sign_off_mode = 1',action:'Submit sign-off report to project sponsor and technical lead. Obtain written approval before removing legacy system write access. Archive the validation evidence pack.'},
+];
+
+document.getElementById('stepList').innerHTML = steps.map(s=>`
+  <div class="step-item" style="border-color:${s.border}">
+    <div class="step-num" style="background:${s.color};color:${s.textColor};border:1px solid ${s.border}">${s.n}</div>
+    <div class="step-body">
+      <div class="step-title">${s.title}</div>
+      <div class="step-desc">${s.desc}</div>
+      <div class="step-query">${s.query.split('\n')[0].substring(0,80)}...</div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:.6rem;line-height:1.6"><b style="color:var(--text)">Action:</b> ${s.action}</div>
+    </div>
+  </div>
+`).join('');
+
+function show(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+}
+</script>
+</body>
+</html>
