@@ -242,7 +242,7 @@ export default function Home() {
             <div className="flex gap-3 shrink-0">
               <a href="https://lumina.maluxdata.io" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-primary/20 hover:bg-primary/40 text-primary-foreground border border-primary/20">
-                  Try it live ↗
+                  Find out more ↗
                 </Button>
               </a>
               <Link href="/contact">
