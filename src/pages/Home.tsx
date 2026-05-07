@@ -22,7 +22,7 @@ export default function Home() {
         <div className="container relative z-10 text-center">
           <div className="inline-block mb-4 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md">
             <span className="text-sm font-medium text-primary tracking-wide uppercase">
-              Data Scientist • PropTech Specialist • Health Analyst
+              Data & Business Analyst • PropTech • Healthcare
             </span>
           </div>
 
